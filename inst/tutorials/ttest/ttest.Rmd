@@ -1,0 +1,561 @@
+---
+title: "Independent Samples t-tests"
+output: learnr::tutorial
+runtime: shiny_prerendered
+description: >
+  Independent samples t, effect sizes, homogeneity of variance, Bayes Factors
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(knitr)
+library(lsr)
+library(BayesFactor)
+library(ggplot2)
+library(ANOVATutorials)
+library(MBESS)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Independent Samples t-tests
+
+## Overview
+
+This tutorial focuses on the independent samples t-test. Although you covered this topic in your introductory stats course, I cover many topics that you likely did not cover. 
+
+The PowerPoint slides for the presentation in the videos are on Canvas if you want a standalone copy. 
+
+The videos (as well as others) can also be found on my YouTube channel https://www.youtube.com/channel/UC5kDZTyHZlgSgSEa3YQXOi
+
+### Learning Objectives
+
+Identify appropriate independent samples t applications
+
+Compute 95% confidence intervals and t-tests
+
+Given a problem, define the null and alternative hypotheses
+
+Apply the above procedures to making decisions about null hypotheses
+
+Describe and calculate Cohen's d as a measure of effect size
+
+Describe and interpret Bayes Factors
+
+Identify and test assumptions underlying the independent samples t. 
+
+Apply approaches to address assumption violation
+
+## Data
+
+*aa_framing* is the datafile used in exercises. These data examine reactions to two different affirmative action policies. In one condition, participants were told there were two candidates, the male candidate was slightly more qualified but the female candidate was hired to reduce the company's gender gap (positive frame). The second condition was identical except the wording indicated the male candidate was "rejected" (negative frame). The variables are **Framing**, attitude toward the policy **Attitude** and resentment toward the policy **Resentment**.
+
+Sinclair, S., & Carlsson, R. (in press). Reactions to affirmative action policies in hiring: Effects of framing and beneficiary gender *Analyses of Social Issues and Public Policy*. 
+
+
+### Packages 
+
+This tutorial uses the following new packages:
+
+* `lsr` for effect sizes
+* `BayesFactor` for Bayes Factors
+* `MBESS` for CI around effect sizes
+
+
+## Video 1 Introduction to Independent Samples t-test 
+
+![Video 1: Introduction](https://youtu.be/CcU9yG_tnek)
+
+## Quiz 1 
+
+```{r quiz1, ECHO=F}
+learnr::quiz(
+  learnr::question("The independent samples t-test is used when we want to ...  ",
+    learnr::answer("Compare means between two groups of different people", correct = TRUE),
+    learnr::answer("Compare means between one group of people measured at two time points"),
+    learnr::answer("Estimate the population standard deviation"),
+    learnr::answer("Compare one group to a hypothesized mean"),
+    correct = "Correct.",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    allow_retry = T
+  ),
+  learnr::question("The paired samples t-test is used when we want to ...  ",
+    learnr::answer("Compare means between two groups of different people"),
+    learnr::answer("Compare means between one group of people measured at two time points", correct = TRUE),
+    learnr::answer("Estimate the population standard deviation"),
+    learnr::answer("Compare one group to a hypothesized mean"),    
+    correct = "Correct.",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    allow_retry = T
+  )
+)
+
+``` 
+
+## Video 2 t-test calculations
+
+![](https://youtu.be/rvbIbQgwRgw)
+
+## Quiz 2 
+
+$\large t = \frac{(\bar{x}_1-\bar{x}_2)-(\mu_1-\mu_2)}{s_{\bar{x}_1-\bar{x}_2}}$   
+
+Given the information below, calculate the pooled standard deviation $s_p$, the standard error of the difference between means $s_{\bar{x}_1-\bar{x}_2}$, and the 95% Confidence interval around the differences between means. 
+
+$\large \bar{x}_1=10$  
+$\large \bar{x}_2=5$  
+$\large s_1=5$  
+$\large s_2=5$  
+$\large n_1 = 16$  
+$\large n_2 = 16$  
+
+**quiz on calcs
+```{r quiz2, ECHO=F}
+learnr::quiz(
+  learnr::question("The one sample t is used to ... ",
+    learnr::answer("Compare means between two groups of different people"),
+    learnr::answer("Compare means between one group of people measured at two time points"),
+    learnr::answer("Estimate the population standard deviation"),
+    learnr::answer("Compare one group to a hypothesized mean", correct = TRUE),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+  learnr::question("The Stanford-Binet IQ test is known to produce a population mean of 100. You are interested in whether students at 'elite' colleges are actually smarter than average. Your sample 200 students and obtain a sample mean of 102, **t**(199) = 1.90, **p**=.06. What is the null hypothesis?",
+    learnr::answer("The population mean (mu) = 100", correct = TRUE),
+    learnr::answer("The population mean (mu) = 102"),
+    learnr::answer("The sample mean = 100"),
+    learnr::answer("The sample mean = 102"),
+    correct = "Correct! Null hypotheses always focus on population means",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+  learnr::question("The Stanford-Binet IQ test is known to produce a population mean of 100. You are interested in whether students at 'elite' colleges are actually smarter than average. Your sample 200 students and obtain a sample mean of 102, **t**(199) = 1.90, **p**=.06. What is your conclusion about the null hypothesis in plain English?",
+    learnr::answer("Students at elite colleges do not appear to differ in terms of IQ from the general population", correct = TRUE),
+    learnr::answer("Students at elite colleges have higher IQs than the general population"),
+    learnr::answer("Students at elite colleges are spoiled rich kids"),
+    learnr::answer("Elite colleges ain't so elite"),
+    correct = "Correct! Here because p > .05, we reject the null hypothesis.",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+
+``` 
+
+
+## Video 3: Revisiting Null Hypothesis Testing 
+
+![](https://youtu.be/5OKFUxEdoVg)
+
+## Quiz 3
+(general NHST questions then in the context of the calculations)
+
+Recall from the previous section
+
+$\large \bar{x}_1=10$  
+$\large \bar{x}_2=5$  
+$\large s_1=5$  
+$\large s_2=5$  
+$\large n_1 = 16$  
+$\large n_2 = 16$  
+
+
+$\large s_p=\sqrt{\frac{s_1^2(n_1-1)+s_2^2(n_2-1)}{n_1+n_2-2}}$  
+$\large \sqrt{\frac{5^2(16-1)+5^2(15-1)}{16+16-2}}=\sqrt{\frac{375+375)}{30}}=\sqrt(25)=5$  
+
+$\large s_{\bar{x}_1}=\frac{s_p}{\sqrt{n_1}}$  
+$\large s_{\bar{x}_1}=\frac{5}{\sqrt{16}}=1.25$  
+$\large s_{\bar{x}_2}=\frac{s_p}{\sqrt{n_2}}$  
+$\large s_{\bar{x}_1}=\frac{5}{\sqrt{16}}=1.25$  
+
+$\large s_{\bar{x}_1-\bar{x}_2}=\sqrt {s_{\bar{x}_1}^2 +s_{\bar{x}_2}^2-2rs_{\bar{x}_1}s_{\bar{x}_2}}$  
+$\large s_{\bar{x}_1-\bar{x}_2}=\sqrt{1.25^2+1.25^2-2*0*1.25*1.25}=\sqrt(3.125)=1.77$  
+
+To get the value of *t_.95*:
+
+```{r}
+qt(c(.025, .975), df=30)
+```
+
+$\large 95\% CI: {10-5}\pm 2.042*1.77=[1.39, 8.61]$  
+
+```{r quiz3, ECHO=F}
+learnr::quiz(
+learnr::question("What is the null hypothesis?",
+    learnr::answer(sprintf("$\\mu_1-\\mu_2=0$"), correct = TRUE),
+    learnr::answer(sprintf("$\\mu_1-\\mu_2\\neq0$")),
+    learnr::answer(sprintf("$\\mu=0$")),
+    learnr::answer("none of these"),
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+learnr::question("Given your confidence interval, what is the best conclusion about the null?",
+    learnr::answer("Fail to reject the null"),
+    learnr::answer("Reject the null", correct = TRUE),
+    learnr::answer("Accept the null"),
+    learnr::answer("Accept the alternative"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+  learnr::question("Given the 95 percent CI, which interpretation below is most precise?",
+    learnr::answer("The population mean difference is unlikely to be zero"),
+    learnr::answer("The mean difference in the population is likely somewhere between 1.4 and 8.6", correct = TRUE),
+    learnr::answer("The mean difference in the population is likely to be 5 points"),
+    learnr::answer("The means, they are different from each other"),    
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+    learnr::question("Imagine we calculated a t-test and found the associated probability to be **p**=.10. Which of the following conclusions would be correct?",
+    learnr::answer("The probability that the null is correct is 10 percent"),
+    learnr::answer("If the null was correct, we would get result as or more extreme than our observed mean differences 10 percent of the time", correct = TRUE),
+    learnr::answer("There is a 10 percent chance we made a Type I error"),
+    learnr::answer("There is a 10 percent chance we made a Type II error"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+)
+)
+```
+
+## Video IV Effect Size
+
+
+![](https://youtu.be/BR3x0WkJ81Y)
+
+Calculate the effect size estimate **d**.
+
+$\large d = \frac{\bar{x}_1-\bar{x}_2}{s_p}$  
+
+
+## Quiz 4 
+
+$\large \bar{x}_1=10$  
+$\large \bar{x}_2=5$  
+$\large s_1=5$  
+$\large s_2=5$  
+$\large n_1 = 16$  
+$\large n_2 = 16$  
+$\large s_p=\sqrt{\frac{s_1^2(n_1-1)+s_2^2(n_2-1)}{n_1+n_2-2}}$  
+$\large \sqrt{\frac{5^2(16-1)+5^2(15-1)}{16+16-2}}=\sqrt{\frac{375+375)}{30}}=\sqrt(25)=5$  
+```{r quiz4, ECHO=F}
+learnr::quiz(
+  learnr::question("The measure of effect size discussed in the video is ... ",
+    learnr::answer("Cohen's d", correct = TRUE),
+    learnr::answer("Cohen's t"),
+    learnr::answer("eta squared"),
+    learnr::answer("omega squared"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+  learnr::question("The effect size measures",
+    learnr::answer("The magnitude of differences between two groups", correct = TRUE),
+    learnr::answer("Whether we can say two groups differ"),
+    learnr::answer("The size of the effect"),
+    learnr::answer("The null hypothesis"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+  learnr::question("For this example the effect size was...",
+    learnr::answer("d = 1.0", correct = TRUE),    learnr::answer("d = 0.5"),
+    learnr::answer("d = 2.0"),
+    learnr::answer("None of these"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+  learnr::question("The best interpretation of size of this effect is ...",
+    learnr::answer("A one standard deviation difference between means", correct = TRUE),    
+    learnr::answer("d = 0.5"),
+    learnr::answer("d = 2.0"),
+    learnr::answer("None of these"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+``` 
+
+## Video V Using R 
+
+
+![](https://youtu.be/KdshArXQ-o8)
+
+## Exercise
+
+The following examples use the *aa_framing* data. This study examined the effects of diversity framing on organizational perceptions. All participants read that there were two applicants with the male applicant being slightly more qualified than the female. In both conditions, the female was applicant hired. Participants were randomly assigned to one of two conditions. The first framed the decision as hiring woman to create a more diverse staff (Positive). The other framed the policy as rejecting the man to create a more diverse staff (Negative). The authors compared the mean attitude toward the policy (**Attitude**) and resentment toward the policy (**Resent**) across the two conditions (**Framing**).
+
+
+The code for the independent samples t places the dependent variable (the variable that is interval/ratio) on the left and the dichotomous variable on the right. The code is largely identical to the format we used for regression. Note for later - to use the Welch's adjustment, simply leave out the var.equal=TRUE piece. Welch's is actually the default in R. 
+
+```{r ECHO=TRUE}
+t.test(aa_framing$Attitude~aa_framing$Framing, var.equal=TRUE)
+```
+
+The *lsr* package computes a variety of effect sizes. The format is similar to the t-test but the command is different. This is the first time we've used a package. The lsr:: piece lets R know you are using something from a package. CohensD is the command.  
+
+```{r ECHO=TRUE}
+lsr::cohensD(aa_framing$Attitude~aa_framing$Framing)
+```
+
+### Exercise 
+
+Run a t-test comparing **Resentment** for across conditions. Obtain an effect size for the relationship. 
+
+```{r ex1, exercise = TRUE, exercise.lines = 2}
+
+```
+
+```{r ex1-solution}
+t.test(aa_framing$Resentment~aa_framing$Framing, var.equal=TRUE)
+lsr::cohensD(aa_framing$Resentment~aa_framing$Framing)
+```
+
+## Quiz 
+
+```{r}
+t.test(aa_framing$Resentment~aa_framing$Framing, var.equal=TRUE)
+lsr::cohensD(aa_framing$Resentment~aa_framing$Framing)
+```
+
+
+The following questions refer to the analyses you just ran. Results are reproduced above for your convenience. 
+
+```{r quiz6, ECHO=F}
+learnr::quiz(
+  learnr::question("What is the null hypothesis?",
+    learnr::answer(sprintf("$\\mu_1-\\mu_2=0$"), correct = TRUE),
+    learnr::answer(sprintf("$\\mu_1-\\mu_2\\neq0$")),
+    learnr::answer(sprintf("$\\mu=0$")),
+    learnr::answer("none of these"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+ learnr::question("What is your conclusion about the null hypothesis?",
+    learnr::answer("Fail to reject the null", correct = TRUE),
+    learnr::answer("Reject the null"),
+    learnr::answer("Accept the null"),
+    learnr::answer("It is wrong"),
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+ ,
+ learnr::question("The best plain English conclusion here would be",
+    learnr::answer("We have no evidence that framing relates to resentment toward policies", correct = TRUE),
+    learnr::answer("The positive framing condition produced more resentment"),
+    learnr::answer("The negative framing condition produced more resentment"),
+    learnr::answer("The positive and negative frames differ in terms of resentment"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+``` 
+
+
+## Video VI Assumptions
+![] (https://youtu.be/vFu-ArkVRrA)
+
+## Quiz
+
+```{r ECHO=TRUE}
+tapply(aa_framing$Resentment, aa_framing$Framing,var)
+table(aa_framing$Framing)
+```
+
+The results above provide information you need to assess assumption. 
+
+
+```{r quiz5, ECHO=F}
+learnr::quiz(
+  learnr::question("Do these data meet homogeneity of variance assumptions?",
+    learnr::answer(sprintf("Yes"), correct = TRUE),
+    learnr::answer(sprintf("No")),
+    learnr::answer(sprintf("Maybe")),
+    learnr::answer("My reply is no"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+ learnr::question("What if the variances were 25 and 5? Would you meet the assumption then?",
+    learnr::answer(sprintf("No"), correct = TRUE),
+    learnr::answer(sprintf("Yes")),
+    learnr::answer(sprintf("Maybe")),
+    learnr::answer("My reply is no"),
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+``` 
+
+## Video VII APA Style 
+
+![](https://youtu.be/DAHEaQFEkTo)
+
+## Exercise
+
+The code below takes the d value (noted as smd) and each group's sample size. 
+
+```{r ECHO=TRUE}
+MBESS::ci.smd(smd=0.121493,n.1=135,n.2=137)
+```
+
+Run the 95% CI around d for the resentment variable. As a reminder the effect size was d = 0.040. 
+
+```{r ex3, exercise = TRUE, exercise.lines = 1}
+
+```
+
+```{r ex3-solution}
+MBESS::ci.smd(smd=0.040,n.1=135,n.2=137)
+```
+
+
+## Video VIII On Beyond Significance Testing
+
+![](https://youtu.be/z1cRvG1nugo)
+
+## Bayes Factor Exercise
+
+The code for the Bayes Factor is shown below. 
+
+```{r ECHO=TRUE}
+BayesFactor::ttestBF(formula=Attitude~Framing, data=aa_framing)
+```
+
+The value we get is BF10, support for the alternative over the null. 
+
+To focus on support for the null over the alternative, we need BF01. We can calculate this simply by taking one over BF10.
+
+```{r ECHO=TRUE}
+1/BayesFactor::ttestBF(formula=Attitude~Framing, data=aa_framing)
+```
+Recall the rough guide to interpreting BF:
+
+BF< 0 	Negative (supports opposite direction)   
+0-3 	Anecdotal   
+3-10 Substantial  
+10-30 Strong  
+30-100 Very Strong  
+100 + Decisive  
+
+This suggests we have substantial evidence that framing does not influence attitudes toward the policies.
+
+### Exercise
+
+Obtain the Bayes Factor for the resentment variable. Convert it to BF 01 (you can do this all in one line of code).
+
+```{r ex4, exercise = TRUE, exercise.lines = 1}
+
+```
+
+```{r ex4-solution}
+1/BayesFactor::ttestBF(formula=Resentment~Framing, data=aa_framing)
+```
+
+
+## Quiz 
+```{r quiz9, ECHO=F}
+learnr::quiz(
+  learnr::question("A Bayes Factor can provide evidence for ...",
+    learnr::answer("Both the null and the alternative hypotheses", correct = TRUE),
+    learnr::answer("The null"),
+    learnr::answer("The alternative"),
+    learnr::answer("None of the above"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+learnr::question("The adjustment for equality of variance violations is called ...",
+    learnr::answer("Welch's test", correct = TRUE),
+    learnr::answer("Steve's test"),
+    learnr::answer("Aberson's excellent test of homogeneity"),
+    learnr::answer("None of the above"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+ learnr::question("The proposed new standard for alpha is ...",
+    learnr::answer(".005", correct = TRUE),
+    learnr::answer(".05"),
+    learnr::answer(".01"),
+    learnr::answer(".50"),
+    correct = "Correct! ",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+``` 
+
+## Video IX Interpreting Confidence Interval Graphs
+
+![](https://youtu.be/8hZ8oM37AA8)
+
+## Quiz
+
+```{r echo=FALSE}
+d=data.frame(x=c("Control","Treatment"), mean=c(3,4), lower=c(1,2), upper=c(5,6))
+ggplot() + 
+geom_errorbar(data=d, mapping=aes(x=x, ymin=upper, ymax=lower), width=0.2, size=1, color="blue") + 
+geom_point(data=d, mapping=aes(x=x, y=mean), size=4, shape=21, fill="white")
+
+d=data.frame(x=c("Control","Treatment"), mean=c(3,5.25), lower=c(1.5,3.75), upper=c(4.5,6.75))
+ggplot() + 
+geom_errorbar(data=d, mapping=aes(x=x, ymin=upper, ymax=lower), width=0.2, size=1, color="blue") + 
+geom_point(data=d, mapping=aes(x=x, y=mean), size=4, shape=21, fill="white")
+```
+
+```{r quiz8, ECHO=F}
+learnr::quiz(
+  learnr::question("The correct decision for the first graph is to ...",
+    learnr::answer("Fail to Reject the Null", correct = TRUE),
+    learnr::answer("Reject the Null"),
+    learnr::answer("Accept the Null"),
+    learnr::answer("none of these"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+  learnr::question("The correct decision for the second graph is to ...",
+    learnr::answer("Fail to Reject the Null", correct = TRUE),
+    learnr::answer("Reject the Null"),
+    learnr::answer("Accept the Null"),
+    learnr::answer("none of these"),
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+``` 
+
+
+
+##
+Congratulations! You've reached the end of the tutorial. 
