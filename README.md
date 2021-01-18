@@ -4,6 +4,8 @@ To install the package, use the following code.
     library(devtools)  
     install_github("chrisaberson/ANOVATutorials")  
 
+You may need to install the packages separately. (e.g., install.packages("learnr") then install.packages("car"). This will likely take a good bit of processing time, some of these packages are very large. 
+
 To run a tutorial, use this code.
 
     library(learnr)  
