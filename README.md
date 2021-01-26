@@ -10,6 +10,7 @@ To run a tutorial, use this code.
 
     library(learnr)  
     run_tutorial("ttest", package = "ANOVATutorials")
+    run_tutorial("OneFactorANOVA", package = "ANOVATutorials")
 
 After you run this code, the tutorial will open in a tab on your
 browser.
