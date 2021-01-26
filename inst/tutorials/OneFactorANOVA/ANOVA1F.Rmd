@@ -1,0 +1,578 @@
+---
+title: "One Factor ANOVA"
+output: learnr::tutorial
+runtime: shiny_prerendered
+description: >
+  One Factor ANOVA 
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(knitr)
+library(lsr)
+library(car)
+library(dplyr)
+library(ggplot2)
+library(BayesFactor)
+library(ANOVATutorials)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# One Factor ANOVA
+
+## Overview
+
+This tutorial focuses on the one factor ANOVA. 
+
+The PowerPoint slides for the presentation in the videos are on Canvas if you want a standalone copy. 
+
+The videos (as well as others) can also be found on my YouTube channel https://www.youtube.com/channel/UC5kDZTyHZlgSgSEa3YQXOi
+
+### Learning Objectives
+
+Define between subjects and within subjects
+
+Explain the conditions for applying the One Factor ANOVA
+
+Compute Sums of Squares, degrees of freedom, Mean Square, and F
+
+Given a problem, define the null and alternative hypotheses
+
+Apply the above procedures to making decisions about null hypotheses
+
+Describe and calculate eta-squared as a measure of effect size
+
+Understand the equivalence of ANOVA and linear regression
+
+Use R to compute ANOVA and eta-squared
+
+Tell all your friends about Sums of Squares
+
+Apply multiple comparison tests 
+
+Compute Bayes Factor statistics for ANOVA
+
+## Data
+
+*covid1F* is the datafile used in exercises. These data examine the effectiveness of several interventions designed to increase social distancing. 
+
+Leary, A., Dvorak, R., Leon, A. D., Peterson, R., & Troop-Gordon, W. (2020). *COVID-19 Social Distancing*. PsyArXiv. https://do0i.org/1.31234/osf.io/mszw2
+
+
+The datafile includes the variables **political** (political orientation), **group** (intervention group), **Beliefs** (COVID beliefs), and **SD** (social distancing behaviors)
+
+
+### Packages 
+
+This tutorial uses the following new packages:
+
+* `lsr` for effect sizes
+* `car` for ANOVA computations
+* `BayesFactor` for ... now what do you think it is for?
+* `ggplot2` for graphing
+* `DescTools` and `multcomp` for multiple comparisons
+* `dplyr` for data manipulation
+
+## Video 1 Introduction to ANOVA
+
+![Video 1: Introduction](https://youtu.be/3QQiv3TgRKU)
+
+Picture made by Ernesto Aberson, tech wiz kid. 
+
+## Quiz 1 
+
+```{r quiz1, ECHO=F}
+learnr::quiz(
+  learnr::question("Between subjects means ...",
+    learnr::answer("Different people in each group", correct = TRUE),
+    learnr::answer("The same people in each group"),
+    learnr::answer("Things participants say to each other"),
+    learnr::answer("The partition in a research lab"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+  learnr::question("The primary advantage of ANOVA over the t-test is ...  ",
+    learnr::answer("It can handle comparisons between more than just two groups", correct = TRUE),
+    learnr::answer("It is more accurate than the t-test"),
+    learnr::answer("It is simpler to calculate"),
+    learnr::answer("It is fancier"),
+    correct = "Correct.",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    allow_retry = T
+  ),
+  learnr::question("The only thing Pearson and Fisher could agree on was ...  ",
+    learnr::answer("Racial injustice must end"),
+    learnr::answer("White people are superior", correct = TRUE),
+    learnr::answer("Black Lives Matter"),
+    learnr::answer("Justice for Breonna Taylor"),    
+    correct = "Correct. Just like Pearson, Fisher was also a racist. Ya sensing a trend here?",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    allow_retry = T
+  ),
+  learnr::question("The effect size estimate for the 1 factor ANOVA is called ...  ",
+    learnr::answer("Cohen's d"),
+    learnr::answer("eta-squared", correct = TRUE),
+    learnr::answer("R-squared"),
+    learnr::answer("Q-cubed"),    
+    correct = "Correct.",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    allow_retry = T
+  )
+)
+
+``` 
+
+## Video 2 One Factor ANOVA Calculations
+
+![](https://youtu.be/I3SvBUMDsSY)
+
+## Exercise
+
+$\large SS_{Total}=\Sigma(x-\bar{x}_t)^2$  
+$\large SS_{Between}=\Sigma n_j(\bar{x}_j-\bar{x}_t)^2$  
+$\large SS_{Within}=\Sigma(x-\bar{x}_j)^2$  
+
+```{r echo=FALSE}
+group<-c("one","one","one","two","two","two","three","three","three")
+x<-c(2,4,6,4,6,8,6,8,16)
+xx<-as.data.frame(cbind(group,x))
+xx$group<-as.factor(xx$group)
+xx$x<-as.numeric(xx$x)
+knitr::kable(xx)
+```
+
+
+```{r quiz3, ECHO=F}
+learnr::quiz(
+  learnr::question("What is SS Total? ",
+    learnr::answer("6"),
+    learnr::answer("56"),
+    learnr::answer("76"),
+    learnr::answer("132", correct = TRUE),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+     learnr::question("What is SS Between? ",
+    learnr::answer("6"),
+    learnr::answer("56", correct = TRUE),
+    learnr::answer("76"),
+    learnr::answer("132"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+   learnr::question("What is SS Within?",
+    learnr::answer("6"),
+    learnr::answer("56"),
+    learnr::answer("76", correct = TRUE),
+    learnr::answer("132"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+) ,
+   learnr::question("What is df between?",
+    learnr::answer("6"),
+    learnr::answer("56"),
+    learnr::answer("2", correct = TRUE),
+    learnr::answer("132"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+   learnr::question("What is df Within?",
+    learnr::answer("2"),
+    learnr::answer("56"),
+    learnr::answer("6", correct = TRUE),
+    learnr::answer("132"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+
+```
+
+
+## Exercise 2 More Calculations
+
+$SS_{Total}=132$  
+$SS_{Between}=56$  
+$SS_{Within}=76$  
+$df_{Between}=2$  
+$df_{Within}=6$  
+
+$\large MS_{Between}=\frac{SS_{Between}}{df_{Between}}$  
+
+$\large MS_{Within}=\frac{SS_{Within}}{df_{Within}}$  
+
+$\large F = \frac{MS_{Between}}{MS_{Within}}$  
+
+$\large \eta^2=\frac{SS_{Between}}{SS_{Total}}$
+
+```{r quiz2, ECHO=F}
+learnr::quiz(
+ learnr::question("What is MS Between? ",
+    learnr::answer("3"),
+    learnr::answer("28", correct = TRUE),
+    learnr::answer("12"),
+    learnr::answer("132"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+   learnr::question("What is MS Within?",
+    learnr::answer("6"),
+    learnr::answer("28"),
+    learnr::answer("12", correct = TRUE),
+    learnr::answer("132"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+),
+   learnr::question("What is F?",
+    learnr::answer("6"),
+    learnr::answer("4"),
+    learnr::answer("2.33", correct = TRUE),
+    learnr::answer("1"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+   learnr::question("What is eta-squared?",
+    learnr::answer(".20"),
+    learnr::answer(".58"),
+    learnr::answer(".42", correct = TRUE),
+    learnr::answer("1.32"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+
+``` 
+
+## Video 3 Multiple Comparison Tests
+
+![](https://youtu.be/v0Wnzig6gpY)
+
+## Quiz
+
+```{r quiz4, ECHO=F}
+learnr::quiz(
+ learnr::question("What problem do multiple comparison tests address? ",
+    learnr::answer("Inflation of ego"),
+    learnr::answer("Inflation of alpha", correct = TRUE),
+    learnr::answer("Inflation of balloons"),
+    learnr::answer("Inflation of beta"),  
+    learnr::answer("Inflation of eta-squared"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+   learnr::question("When would you use Dunnett's test?",
+    learnr::answer("Never"),
+    learnr::answer("When comparing all pairs"),
+    learnr::answer("When comparing all groups to a single other group", correct = TRUE),
+    learnr::answer("When doing orthogonal contrasts"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+),
+   learnr::question("For a comparison between groups 2 and 4 in an orthogonal contrast, which of the following contrast weights would work",
+    learnr::answer("1 1 -1 -1"),
+    learnr::answer("0 0 -1 1"),
+    learnr::answer("0 1 0 -1", correct = TRUE),
+    learnr::answer("1 1 1 1"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+   learnr::question("When would you typically use the Tukey test",
+    learnr::answer("Fourth thurdsday in November"),
+    learnr::answer("With a prior predictions"),
+    learnr::answer("When comparing all pairs", correct = TRUE),
+    learnr::answer("When it ceases to be fun saying 'Bonferroni'"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+```
+
+## Video 4 R Examples
+
+![](https://youtu.be/eGO-tVMl_Mw)
+
+## Exercise 4
+
+The code below demonstrates how to run a one factor ANOVA using a dataset called *xx* with variables *group* and *x*. These are the values you used earlier for hand calculations. The first command runs the ANOVA and captures it in an object called ex1. The `lsr::etasquared` command uses the object that holds the ANOVA results. Next, I demonstrate the `DescTools` and `multcomp` for multiple comparisons and also demonstrate orthogonal contrasts. Please note that you typically would select only one method for comparisons. 
+
+Notes: `lsr` is fussy. If the variables are not factor and numeric, you will get an error. `multcomp` also has some fussiness that I'll get into below. 
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+ex1<-aov(xx$x~xx$group)
+summary(ex1)
+lsr::etaSquared(ex1)
+tapply(xx$x, xx$group, mean)
+tapply(xx$x, xx$group, sd)
+```
+
+### Exercise
+
+Using the *covid1F* data, examine social distancing behaviors (**SD**) by intervention (**group**). The intervention conditions are Personalized Normative Influence (PNF) - participation give an estimate of % of people that engage in social distancing, they are then given an estimate that is larger than theirs as an indication of the prevalence. Direct Normative Theory 1 – Participants who give an answer of less than 50% received feedback on the positive aspects of those who practice social distancing. Those who give an answer of less than 50% receive feedback on the negative aspect of those who do not practice distancing. Direct Normative Theory 2 – Same as DRT1 but based on answer to a 1-8 scale. Control received no intervention. 
+
+Be sure to get an effect size and descriptive statistics.
+
+```{r ex1, exercise = TRUE, exercise.lines = 5}
+
+```
+
+```{r ex1-solution}
+ex1<-aov(covid1F$SD~covid1F$group)
+summary(ex1)
+lsr::etaSquared(ex1)
+tapply(covid1F$SD,covid1F$group, mean)
+tapply(covid1F$SD,covid1F$group, sd)
+```
+
+## Quiz
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r echo=FALSE}
+ex1<-aov(covid1F$SD~covid1F$group)
+summary(ex1)
+lsr::etaSquared(ex1)
+tapply(covid1F$SD,covid1F$group, mean)
+tapply(covid1F$SD,covid1F$group, sd)
+```
+
+
+```{r quiz5, ECHO=F}
+learnr::quiz(
+  learnr::question("What is your conclusion about the null hypothesis based on these results? ",
+    learnr::answer("Reject"),
+    learnr::answer("Accept"),
+    learnr::answer("Fail to Reject", correct = TRUE),
+    learnr::answer("To little information to decide"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+),
+  learnr::question("What does this conclusion mean in plain English",
+    learnr::answer("The interventions worked"),
+    learnr::answer("The interventions do not seem related to social distancing behaviors", correct = TRUE),
+    learnr::answer("People who participated in an intervention distanced more"),
+    learnr::answer("People who participated in an intervention distanced less"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+
+``` 
+
+
+
+## Multiple Comparison Tests and Bayes Factors
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+`multcomp` and `DescTools` provide just about all the multiple comparison tests we need.  
+
+DunnettTest is a command from `DescTools`. The structure is pretty similar to other aspects of the ANOVA except we need to explicitly select the control group. I like this better than the `multcomp` command as that specification allows greater flexibility. 
+```{r}
+DescTools::DunnettTest(x~group,data=xx, control="one")
+```
+
+For the Tukey test, we can use `multcomp`. This package is a little fussy. First we need an analysis object. Inside the mcp command we place the name of the factor and then "Tukey" to specify the command. The fussy part is this - for some commands in `multcomp`, if you use data$variable~data$variable when you run the ANOVA, you get an error. It took me months to figure that issue out. Another is that using multcomp::command seems to work only intermittently.  
+
+```{r}
+xxxx<-aov(x~group, data=xx)
+library(multcomp)
+tukey<-glht(xxxx,linfct=mcp(group="Tukey"))
+summary(tukey)
+```
+
+Finally, for orthogonal contrasts, in this case 2 and 3 vs. 1 and then 2 vs. 3, we need to specific our contrast coding first. I placed that in an object called "mat."
+
+```{r}
+mat<-rbind("1 vs 2 and 3"=c(2,-1,-1),
+           "2 vs. 3"=c(0, 1, -1))
+orthog<-multcomp::glht(xxxx,linfct=mcp(group=mat))
+summary(orthog)
+```
+
+
+### Exercise Multiple Comparisons
+
+Using the *covid1F* dataset perform a multiple comparison test that compares each intervention to the control group. Note that there is some difference of opinion on the use of multiple comparison tests in this situation. Some researchers argue that you would never conduct multiple comparisons unless the ominbus test (the F) was statistically significant (i.e., you could reject the null). However, another school of thought (that I happen to agree with) is that if you have a priori predictions about different treatments that you should perform the multiple comparison tests. 
+
+```{r ex2, exercise = TRUE, exercise.lines = 5}
+
+```
+
+```{r ex2-solution}
+DescTools::DunnettTest(SD~group,data=covid1F, control="control")
+```
+
+## Video 5: APA Style 
+![](https://youtu.be/4EBuo_tRq9Q)
+
+## Graphing Approaches
+
+Graphing with confidence interval error bars can appear challenging, but once you have a working example, you can simply modify it. For the CI, we first summarize our data. This creates a new data file where we calculate the CIs. Once we have calculated the CI, we can graph it. 
+
+The first set of commands use function from `dplyr`. We are creating an object called yy. The command xx %>% passes the name of the dataset to the commands that follow. 
+
+group_by(group) tells R to group your variables using the variable called "group".
+
+summarise mean.x, etc. is creating summary statistics.(it is spelled funny because the package author is from New Zealand). 
+
+The mutate command calculates a new variable that captures the standard error. 
+
+The lower.ci and upper.ci statements calculate the limits of the confidence interval. 
+
+In the ggplot command, we provide the name of the datafile (yy), what goes on each axis, and finally the ci values. The rest does not need  modification
+
+
+
+```{r}
+yy<-xx %>%
+  group_by(group) %>%
+  summarise(mean.x = mean(x, na.rm = TRUE),
+            sd.x = sd(x, na.rm = TRUE),
+            n.x = n()) %>%
+            mutate(se.x = sd.x / sqrt(n.x),
+            lower.ci.x = mean.x - qt(1 - (0.05 / 2), n.x - 1) * se.x,
+            upper.ci.x = mean.x + qt(1 - (0.05 / 2), n.x - 1) * se.x)
+
+ggplot(yy, aes(x=group, y=mean.x)) + 
+    geom_bar(position=position_dodge(), stat="identity") +
+    geom_errorbar(aes(ymin=lower.ci.x, ymax=upper.ci.x),
+                  width=.2,       
+                  position=position_dodge(.9))
+```
+
+### Exercise
+
+Adapt the code found above to create a similar graph for your covid1F analyses. 
+
+We'll do this in two steps. First, summarize the data. 
+
+```{r ex3, exercise = TRUE, exercise.lines = 8}
+
+```
+
+```{r ex3-solution}
+yy<-covid1F %>%
+  group_by(group) %>%
+  summarise(mean.SD = mean(SD, na.rm = TRUE),
+            sd.SD = sd(SD, na.rm = TRUE),
+            n.SD = n()) %>%
+            mutate(se.SD = sd.SD / sqrt(n.SD),
+            lower.ci.SD = mean.SD - qt(1 - (0.05 / 2), n.SD - 1) * se.SD,
+            upper.ci.SD = mean.SD + qt(1 - (0.05 / 2), n.SD - 1) * se.SD)
+```
+
+Now, make the graph
+
+```{r ex4, exercise = TRUE, exercise.lines = 6}
+
+```
+
+```{r ex4-solution}
+ggplot(yy, aes(x=group, y=mean.SD)) + 
+    geom_bar(position=position_dodge(), stat="identity") +
+    geom_errorbar(aes(ymin=lower.ci.SD, ymax=upper.ci.SD),
+                  width=.2,       
+                  position=position_dodge(.9))
+```
+
+## Bayes Factor
+
+The Bayes Factor statistic is pretty straightforward. 
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+group<-c("one","one","one","two","two","two","three","three","three")
+x<-c(2,4,6,4,6,8,6,8,16)
+xx<-as.data.frame(cbind(group,x))
+xx$group<-as.factor(xx$group)
+xx$x<-as.numeric(xx$x)
+```
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+anovaBF(x~group, xx)
+```
+
+Recall the rough guide to interpreting BF:
+
+BF< 0 	Negative (supports opposite direction)   
+0-3 	Anecdotal   
+3-10 Substantial  
+10-30 Strong  
+30-100 Very Strong  
+100 + Decisive  
+
+### Exercise
+
+Adapt the code above to the analyses we've carried out in the previous exercises.
+
+
+```{r ex5, exercise = TRUE, exercise.lines = 1}
+
+```
+
+```{r ex5-solution}
+anovaBF(SD~group,covid1F)
+```
+
+## Fun Fact!
+
+%>% is called a pipe. It was developed initially for the `magrittr` package which is named after the French Painter Rene Magritte (pictured below).
+
+![](\images\magritte.jpg)
+
+This is a famous painting by the artist. 
+
+![](\images\pipe.jpg) 
+
+Which inspired the magrittr sticker design. 
+
+![](\images\magrittr.png)
+
+Congratulations! You've reached the end of the tutorial. 
