@@ -1,0 +1,668 @@
+---
+title: "Assumptions and Missing Data"
+output: learnr::tutorial
+runtime: shiny_prerendered
+description: >
+  Assumptions and Missing Data 
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(knitr)
+library(DescTools)
+library(Amelia)
+library(Zelig)
+library(ANOVATutorials)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Assumptions and Missing Data
+
+## Overview
+
+This tutorial focuses on ANOVA assumptions and dealing with missing data. 
+
+The PowerPoint slides for the presentation in the videos are on Canvas if you want a standalone copy. 
+
+The videos (as well as others) can also be found on my YouTube channel https://www.youtube.com/channel/UC5kDZTyHZlgSgSEa3YQXOi
+
+### Learning Objectives
+
+List the steps involved in data screening
+
+Explain the assumptions underlying ANOVA
+
+Check data accuracy and assumptions
+
+Employ transformations 
+
+Distinguish between the different types of missing data
+
+Get sassy with your advisor if they use listwise deletion or other problematic strategies
+
+Describe limitations and advantages of different approaches to missing data
+
+Conduct Multiple Imputation and Maximum Likelihood
+
+Scream "Likelihood to the MAX!!!! Take that missing data" as you complete your homework
+
+## Data
+
+*missing* is the datafile used in exercises. These data examine the job performance (**Perfomance**), job satisfaction (**Satisfaction**), well being (**WellBeing**), and research condition (**Condition**)
+
+### Packages 
+
+This tutorial uses the following new packages:
+
+* `DescTools` for data screening
+* `lavaan` for Maximum Likelihood
+* `Amelia` for multiple imputation
+* `Zelig` for doing stuff to Amelia objects (also, to make you cringe when you realize that Zelig is a movie by Woody Allen and remembering that he married his daughter)
+
+## Video 1 Data Accuracy
+
+![](https://youtu.be/L7aW-xX3hNM)
+
+Picture made by Ernesto Aberson, tech wiz kid. 
+
+## Quiz 
+
+```{r quiz1, ECHO=F}
+learnr::quiz(
+  learnr::question("Online data collection is always 100% accurate",
+    learnr::answer("Um, no", correct = TRUE),
+    learnr::answer("True!"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+  learnr::question("If you have to enter data from paper surveys the best practice is ...  ",
+    learnr::answer("Double entry", correct = TRUE),
+    learnr::answer("Have your kids do it. What else do they have going on?"),
+    learnr::answer("Single entry"),
+    learnr::answer("Why would I enter data?"),
+    correct = "Correct.",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    allow_retry = T
+  ),
+  learnr::question("Simple analyses like frequency counts can catch ...  ",
+    learnr::answer("Covid-19"),
+    learnr::answer("Out-of-range values", correct = TRUE),
+    learnr::answer("Non-normality"),
+    learnr::answer("Platykurtosis"),    
+    correct = "Correct.",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    allow_retry = T
+  )
+)
+
+``` 
+
+## Video 2 ANOVA Assumptions
+
+![](https://youtu.be/x8M6MLo-py0)
+
+## 
+```{r quiz2, ECHO=F}
+learnr::quiz(
+  learnr::question("What is the primary assumption (that is statistical rather than methodological) in ANOVA? ",
+    learnr::answer("Normality"),
+    learnr::answer("Linearity"),
+    learnr::answer("Heteronormativity of variance"),
+    learnr::answer("Homogeneity of Variance", correct = TRUE),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+     learnr::question("What is the suggested ratio of variances when sample sizes are roughly equal? No more than ...",
+    learnr::answer("10:1"),
+    learnr::answer("4:1", correct = TRUE),
+    learnr::answer("1:1"),
+    learnr::answer("100:50"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+   learnr::question("One (effective) strategy for dealing with non-normality of variables is ...",
+    learnr::answer("Collecting more data"),
+    learnr::answer("Yelling at the computer until the data get themselves together"),
+    learnr::answer("Data transformation", correct = TRUE),
+    learnr::answer("Throw out all the outliers"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+) ,
+   learnr::question("A statistical adjustement for lack of homogeneity of variance is called ...",
+    learnr::answer("Steve's Test"),
+    learnr::answer("Levene's Test"),
+    learnr::answer("Welch's Test", correct = TRUE),
+    learnr::answer("The fix your variances adjustment"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+
+```
+
+
+## Video 3 Checking Assumptions
+
+![](https://youtu.be/AVnnBgjmA5I)
+
+## 
+
+```{r quiz3, ECHO=F}
+learnr::quiz(
+ learnr::question("If your skew statistic produced a 99% CI ranging from -2.4 to 3.6, what would you conclude about skew for that variable?",
+    learnr::answer("The variable has kurtosis problems"),
+    learnr::answer("The variable is normal enough", correct = TRUE),
+    learnr::answer("The variable is skewed"),
+    learnr::answer("If I were to make a histogram it would look like a platypus"), 
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+),
+   learnr::question("What type of plot is the most definitive for determining normality",
+    learnr::answer("Box Plot"),
+    learnr::answer("Q-Q Plot"),
+    learnr::answer("All of these work", correct = TRUE),
+    learnr::answer("Histogram"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+```
+
+## Video 4 Transformations 
+
+![](https://youtu.be/Mvzh21jr1LE)
+
+## 
+
+```{r quiz4, ECHO=F}
+learnr::quiz(
+    learnr::question("Which of the following are not common transformation?",
+    learnr::answer("Square root"),
+    learnr::answer("Log10"),
+    learnr::answer("Cube root", correct = TRUE),
+    learnr::answer("Inverse"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+),
+  learnr::question("If your data are negatively skewed you should ... ",
+    learnr::answer("Delete the variable"),
+    learnr::answer("Reflect them before transforming", correct = TRUE),
+    learnr::answer("Just do the normal transformations then wonder why they made the skew and kurtosis so much worse"),
+    learnr::answer("Don't bother transforming"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+  learnr::question("Why do we add one (or a larger number when we have variables with negative values) prior to transformation?",
+    learnr::answer("Because we're number one!"),
+    learnr::answer("So our data do not contain zeros", correct = TRUE),
+    learnr::answer("No reason, that's just how people always did it"),
+    learnr::answer("We don't do that"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+
+``` 
+
+## Data screening and transformation in R
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Using the *missing* data, we will demonstrate a few approaches for screening and transformation. Most of the analyses are pretty straightforward.
+
+### Boxplots
+```{r}
+boxplot(missing$Performance)
+```
+
+### Histograms
+
+```{r}
+hist(missing$Performance)
+```
+
+### Q-Q Plots
+
+Not as good as P-P plots
+```{r}
+qqnorm(missing$Performance);qqline(missing$Performance)
+```
+
+### Transformations
+
+I always try to name the new variable after the transformation to keep stuff straight. 
+
+(Note: this variable looks fine but we'll go through the process anyway)
+
+
+```{r}
+missing$Perf_sq<-sqrt(missing$Performance+1)
+missing$Perf_log<-log10(missing$Performance+1)
+missing$Perf_inv<-1/(missing$Performance+1)
+```
+
+Now run skew and kurtosis using *DescTools*.
+
+```{r}
+DescTools::Skew(missing$Perf_sq, na.rm=TRUE, method = 2, conf.level = .99) 
+DescTools::Kurt(missing$Perf_sq, na.rm=TRUE, method = 2, conf.level = .99) 
+DescTools::Skew(missing$Perf_log, na.rm=TRUE, method = 2, conf.level = .99) 
+DescTools::Kurt(missing$Perf_log, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Skew(missing$Perf_inv, na.rm=TRUE, method = 2, conf.level = .99) 
+DescTools::Kurt(missing$Perf_inv, na.rm=TRUE, method = 2, conf.level = .99)
+```
+
+Don't worry about the warnings. These are just saying you have outliers. 
+
+### Exercise 
+
+Using the *missing* dataset screen and transform the **Satisfaction** variable. Use at least one graph (whatever you like), get skew and kurtosis values and then apply all three transformations (even if it doesn't need to be transformed). 
+
+First the plots.
+```{r ex1, exercise = TRUE, exercise.lines = 1}
+
+```
+
+```{r ex1-solution}
+qqnorm(missing$Satisfaction);qqline(missing$Satisfaction)
+```
+
+Now the Skew and Kurtosis
+
+```{r ex2, exercise = TRUE, exercise.lines = 2}
+
+```
+
+```{r ex2-solution}
+DescTools::Skew(missing$Satisfaction, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Kurt(missing$Satisfaction, na.rm=TRUE, method = 2, conf.level = .99)
+```
+
+
+And the transformations  
+
+```{r ex3, exercise = TRUE, exercise.lines = 3}
+
+```
+
+```{r ex3-solution}
+missing$Sat_sq<-sqrt(missing$Satisfaction+1)
+missing$Sat_log<-log10(missing$Satisfaction+1)
+missing$Sat_inv<-1/(missing$Satisfaction+1)
+```
+
+
+
+
+Now let's run skew and kurtosis for the transformed variables (I'll ask you questions about these after the next video) 
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r ECHO=FALSE}
+missing$Sat_sq<-sqrt(missing$Satisfaction+1)
+missing$Sat_log<-log10(missing$Satisfaction+1)
+missing$Sat_inv<-1/(missing$Satisfaction+1)
+```
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r ex4, exercise = TRUE, exercise.lines = 6}
+
+```
+
+```{r ex4-solution}
+DescTools::Skew(missing$Sat_sq, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Kurt(missing$Sat_sq, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Skew(missing$Sat_log, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Kurt(missing$Sat_log, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Skew(missing$Sat_inv, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Kurt(missing$Sat_inv, na.rm=TRUE, method = 2, conf.level = .99)
+
+```
+
+## Video 5: Analyses
+![](https://youtu.be/zPKZy_A0ETk)
+
+## Interpreting Skew and Kurtosis
+
+```{r}
+DescTools::Skew(missing$Satisfaction, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Kurt(missing$Satisfaction, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Skew(missing$Sat_sq, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Kurt(missing$Sat_sq, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Skew(missing$Sat_log, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Kurt(missing$Sat_log, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Skew(missing$Sat_inv, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Kurt(missing$Sat_inv, na.rm=TRUE, method = 2, conf.level = .99)
+```
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r quiz5, ECHO=F}
+learnr::quiz(
+    learnr::question("What is your interpretation of the skew? Which approach would you use? ",
+    learnr::answer("Square root"),
+    learnr::answer("Log10"),
+    learnr::answer("Nothing, original variable is fine", correct = TRUE),
+    learnr::answer("Inverse"),  
+    correct = "Correct! The confidence interval contains zero, so there is no problem with skew." ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+  
+  learnr::question("What is your interpretation of the kurtosis? Which approach would you use?",
+    learnr::answer("Square root"),
+    learnr::answer("Log10"),
+    learnr::answer("Nothing, original variable is fine", correct = TRUE),
+    learnr::answer("Inverse"),  
+    correct = "Correct! The confidence interval contains zero, so there is no problem with skew.",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+  learnr::question("Transformations always make it easier to find statistical significance...",
+    learnr::answer("True"),
+    learnr::answer("False", correct = TRUE),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+
+``` 
+
+## Video 6: Missing Data
+![](https://youtu.be/sg51YC9dKSQ)
+
+
+## 
+
+```{r quiz6, ECHO=F}
+learnr::quiz(
+    learnr::question("Which is an example of missing completely at random ",
+    learnr::answer("People who score higher on the variable of interest tend not to answer"),
+    learnr::answer("People who score higher on another variable are less likely to have data on the variable of interest"),
+    learnr::answer("The stupid copier randomly omits pages from surveys", correct = TRUE),
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+    learnr::question("Which is an example of missing at random",
+    learnr::answer("People who score higher on the variable of interest tend not to answer"),
+    learnr::answer("People who score higher on another variable are less likely to have data on the variable of interest", correct = TRUE),
+    learnr::answer("The stupid copier randomly omits pages from surveys"),
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+    learnr::question("Which is an example of missing not at random ",
+    learnr::answer("People who score higher on the variable of interest tend not to answer", correct = TRUE),
+    learnr::answer("People who score higher on another variable are less likely to have data on the variable of interest"),
+    learnr::answer("The stupid copier randomly omits pages from surveys"),
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+),
+    learnr::question("In missing data language, dependent variable means ...",
+    learnr::answer("The dependent variable"),
+    learnr::answer("The variable you expect to change following the manipulation"),
+    learnr::answer("Whatever variable that has missing data we are talking about", correct = TRUE),
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+))
+``` 
+
+## Video 7: Historical Approaches
+![](https://youtu.be/kRwkDlmmbhY)
+
+## 
+```{r quiz7, ECHO=F}
+learnr::quiz(
+    learnr::question("What is wrong with listwise deletion?",
+    learnr::answer("Lose too many cases", correct = TRUE),
+    learnr::answer("Decreases Standard Error"),
+    learnr::answer("Increases Standard Error"),
+    learnr::answer("All of the above"),
+
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+    learnr::question("What is wrong with mean imputation?",
+    learnr::answer("Lose too many cases"),
+    learnr::answer("Decreases Standard Error", correct = TRUE),
+    learnr::answer("Increases Standard Error"),
+    learnr::answer("All of the above"),
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+    learnr::question("What is wrong with regression imputation?",
+    learnr::answer("Lose too many cases"),
+    learnr::answer("Decreases Standard Error"),
+    learnr::answer("Increases Standard Error"),
+    learnr::answer("Decreases standard error and increases effect size", correct = TRUE),
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+),
+    learnr::question("Historical approaches to missing data are ...",
+    learnr::answer("Awesome! "),
+    learnr::answer("Pretty Pretty Pretty Good"),
+    learnr::answer("A hot stinking pile of garbage", correct = TRUE),
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+))
+```
+
+## Video 8: "Modern" Approaches
+![](https://youtu.be/5atPA7n8FEw)
+
+
+```{r quiz8, ECHO=F}
+learnr::quiz(
+    learnr::question("What do Multiple Imputation and Maximum Likelihood assume?",
+    learnr::answer("MCAR or MAR", correct = TRUE),
+    learnr::answer("MNAR"),
+    learnr::answer("MCAR"),
+    learnr::answer("MAR"),
+
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+))
+```
+
+## Video 9: Multiple Imputation
+![](https://youtu.be/u8A4LgcakH8)
+
+## 
+```{r quiz9, ECHO=F}
+learnr::quiz(
+    learnr::question("What is the basic idea behind multiple imputation?",
+    learnr::answer("Create multiple dataset, run analyses on all, then pool together", correct = TRUE),
+    learnr::answer("Find a single estimate for missing values"),
+    learnr::answer("Delete missing data"),
+    learnr::answer("All of the above"),
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+    learnr::question("We use diagnostics in MI to estabish ... ",
+    learnr::answer("Stability of Estimates and whether Imputations are Reasonable", correct = TRUE),
+    learnr::answer("Correct Standard Errors"),
+    learnr::answer("Normality of Estimates"),
+    learnr::answer("Homogeneity of Variance"),
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ))
+```
+
+## Exercises
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r echo=FALSE}
+set.seed(1256)
+df <- MASS::mvrnorm(480, mu = c(20, 40, 60), Sigma = matrix(c(1, .20, .40,
+                                                          .20, 1, .30,
+                                                          .40, .30, 1),
+                                                          ncol = 3), empirical = TRUE)
+full <- data.frame(df)
+full<-dplyr::rename(full, X1 = X1, X2 = X2, X3 = X3)
+missex<-simsem::imposeMissing(full,cov=1, pmMAR = .30)
+missex$condition<-gl(2, 240, labels = c("Control", "Treat"))
+missex<-as.data.frame(missex)
+missing<-dplyr::select(missing,Performance,Satisfaction,WellBeing,Condition )
+```
+
+Running Imputations
+
+Feed R the name of the data and indicate which variables are categorical (noms).
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+mi <- Amelia::amelia(missex, m=20, noms = "condition")
+```
+
+Perform the Diagnostics
+
+```{r}
+Amelia::disperse(mi, dims = 1, m = 20)
+plot(mi, which.vars=2)
+plot(mi, which.vars=3)
+```
+
+Finally, pool the analyses.
+
+```{r}
+z.out <- zelig(X2 ~ condition, model= "ls", data= mi) #do the computes etc.
+summary(z.out)
+```
+### Exercises
+
+Using the datafile *missing2* from perform multiple imputation, get diagnostics for the second and third variables, and an analysis of **Satisfaction** predicted by **Condition**. 
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+First, do the imputations 
+
+
+
+
+```{r ex6, exercise = TRUE, exercise.lines = 1}
+
+
+```
+
+```{r ex6-solution}
+mi <- amelia(missing2, m=20, noms = "Condition")
+
+```
+
+Now, the diagnostics.
+
+```{r ex7, exercise = TRUE, exercise.lines = 3}
+
+```
+
+
+```{r ex7-solution}
+Amelia::disperse(mi, dims = 1, m = 20)
+plot(mi, which.vars=2)
+plot(mi, which.vars=3)
+```
+
+And finally, the pooling. 
+
+```{r ex8, exercise = TRUE, exercise.lines = 2}
+```
+
+Note that you will get two coefficients for condition. 
+```{r ex8-solution}
+z.out <- zelig(Satisfaction ~ Condition, model= "ls", data= mi) 
+summary(z.out)
+```
+
+## Video 10: Maximum Likelihood and Final Topics
+![](https://youtu.be/9NeRqmgghSo)
+
+## 
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+```{r quiz10, ECHO=F}
+learnr::quiz(
+    learnr::question("In most cases, what is the most foolproof way to deal with missing data?",
+    learnr::answer("Maximum Likelihood", correct = TRUE),
+    learnr::answer("Listwise deletion foreva!"),
+    learnr::answer("Regresion Imputation"),
+    learnr::answer("Multiple Imputation"),
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+    learnr::question("Why do bad practices regarding missing data persist in psychology?",
+    learnr::answer("Bad practices lead to outcomes that favor authors (e.g., significant results)", correct = TRUE),
+    learnr::answer("Psychologists are unethical"),
+    learnr::answer("Because modern approaches to missing data are wrong"),
+    learnr::answer("No reason"),
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ))
+```
+
+Congratulations! You've reached the end of the tutorial. 
