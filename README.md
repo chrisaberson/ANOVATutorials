@@ -1,6 +1,6 @@
 To install the package, use the following code.
 
-    install.packages("learnr","car","lsr","ggplot2","car","ezANOVA","BayesFactor","MBESS")
+    install.packages("learnr","car","lsr","ggplot2","car","ezANOVA","BayesFactor","DescTools","MBESS","lavaan","Amelia","Zelig")
     library(devtools)  
     install_github("chrisaberson/ANOVATutorials")  
 
@@ -11,6 +11,7 @@ To run a tutorial, use this code.
     library(learnr)  
     run_tutorial("ttest", package = "ANOVATutorials")
     run_tutorial("OneFactorANOVA", package = "ANOVATutorials")
+    run_tutorial("Assumptions", package = "ANOVATutorials")
 
 After you run this code, the tutorial will open in a tab on your
 browser.
