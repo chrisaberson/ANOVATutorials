@@ -24,7 +24,7 @@
 #'   \item{SD}{Social Distancing}
 #' }
 
-"missing"
+"covid1F"
 
 #' Missing data example
 #'
@@ -33,18 +33,15 @@
 #' @format A data frame with 480 rows and 4 variables:
 #' \describe{
 #'   \item{Performance}{Job performance}
-#'   \item{Satifaction}{Job satifaction}
+#'   \item{Satisfaction}{Job satifaction}
 #'   \item{WellBeing}{Well Being}
 #'   \item{Condition}{Condition}
 #'   \item{Sat_sq}{sq}
 #'   \item{Sat_log}{lg}
 #'   \item{Sat_inv}{inv}
-
 #' }
 
-"missing"
-
-"missing"
+"tutorial3"
 
 #' Missing data example 2
 #'
@@ -53,7 +50,7 @@
 #' @format A data frame with 480 rows and 4 variables
 #' \describe{
 #'   \item{Performance}{Job performance}
-#'   \item{Satifaction}{Job satifaction}
+#'   \item{Satisfaction}{Job satifaction}
 #'   \item{WellBeing}{Well Being}
 #'   \item{Condition}{Condition}
 #' }
