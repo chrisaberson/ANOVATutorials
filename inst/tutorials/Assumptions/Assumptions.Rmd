@@ -12,6 +12,8 @@ library(knitr)
 library(DescTools)
 library(Amelia)
 library(Zelig)
+library(simsem)
+library(dplyr)
 library(ANOVATutorials)
 knitr::opts_chunk$set(echo = FALSE)
 ```
@@ -48,7 +50,7 @@ Scream "Likelihood to the MAX!!!! Take that missing data" as you complete your h
 
 ## Data
 
-*missing* is the datafile used in exercises. These data examine the job performance (**Perfomance**), job satisfaction (**Satisfaction**), well being (**WellBeing**), and research condition (**Condition**)
+*miss* is the datafile used in exercises. These data examine the job performance (**Perfomance**), job satisfaction (**Satisfaction**), well being (**WellBeing**), and research condition (**Condition**)
 
 ### Packages 
 
@@ -232,24 +234,25 @@ learnr::quiz(
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Using the *missing* data, we will demonstrate a few approaches for screening and transformation. Most of the analyses are pretty straightforward.
+Using the *tutorial3* data, we will demonstrate a few approaches for screening and transformation. Most of the analyses are pretty straightforward.
 
 ### Boxplots
+
 ```{r}
-boxplot(missing$Performance)
+boxplot(missing2$Performance)
 ```
 
 ### Histograms
 
 ```{r}
-hist(missing$Performance)
+hist(tutorial3$Performance)
 ```
 
 ### Q-Q Plots
 
 Not as good as P-P plots
 ```{r}
-qqnorm(missing$Performance);qqline(missing$Performance)
+qqnorm(tutorial3$Performance);qqline(tutorial3$Performance)
 ```
 
 ### Transformations
@@ -260,27 +263,27 @@ I always try to name the new variable after the transformation to keep stuff str
 
 
 ```{r}
-missing$Perf_sq<-sqrt(missing$Performance+1)
-missing$Perf_log<-log10(missing$Performance+1)
-missing$Perf_inv<-1/(missing$Performance+1)
+tutorial3$Perf_sq<-sqrt(tutorial3$Performance+1)
+tutorial3$Perf_log<-log10(tutorial3$Performance+1)
+tutorial3$Perf_inv<-1/(tutorial3$Performance+1)
 ```
 
 Now run skew and kurtosis using *DescTools*.
 
 ```{r}
-DescTools::Skew(missing$Perf_sq, na.rm=TRUE, method = 2, conf.level = .99) 
-DescTools::Kurt(missing$Perf_sq, na.rm=TRUE, method = 2, conf.level = .99) 
-DescTools::Skew(missing$Perf_log, na.rm=TRUE, method = 2, conf.level = .99) 
-DescTools::Kurt(missing$Perf_log, na.rm=TRUE, method = 2, conf.level = .99)
-DescTools::Skew(missing$Perf_inv, na.rm=TRUE, method = 2, conf.level = .99) 
-DescTools::Kurt(missing$Perf_inv, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Skew(tutorial3$Perf_sq, na.rm=TRUE, method = 2, conf.level = .99) 
+DescTools::Kurt(tutorial3$Perf_sq, na.rm=TRUE, method = 2, conf.level = .99) 
+DescTools::Skew(tutorial3$Perf_log, na.rm=TRUE, method = 2, conf.level = .99) 
+DescTools::Kurt(tutorial3$Perf_log, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Skew(tutorial3$Perf_inv, na.rm=TRUE, method = 2, conf.level = .99) 
+DescTools::Kurt(tutorial3$Perf_inv, na.rm=TRUE, method = 2, conf.level = .99)
 ```
 
 Don't worry about the warnings. These are just saying you have outliers. 
 
 ### Exercise 
 
-Using the *missing* dataset screen and transform the **Satisfaction** variable. Use at least one graph (whatever you like), get skew and kurtosis values and then apply all three transformations (even if it doesn't need to be transformed). 
+Using the *missing2* dataset screen and transform the **Satisfaction** variable. Use at least one graph (whatever you like), get skew and kurtosis values and then apply all three transformations (even if it doesn't need to be transformed). 
 
 First the plots.
 ```{r ex1, exercise = TRUE, exercise.lines = 1}
@@ -288,7 +291,7 @@ First the plots.
 ```
 
 ```{r ex1-solution}
-qqnorm(missing$Satisfaction);qqline(missing$Satisfaction)
+qqnorm(missing2$Satisfaction);qqline(missing2$Satisfaction)
 ```
 
 Now the Skew and Kurtosis
@@ -298,8 +301,8 @@ Now the Skew and Kurtosis
 ```
 
 ```{r ex2-solution}
-DescTools::Skew(missing$Satisfaction, na.rm=TRUE, method = 2, conf.level = .99)
-DescTools::Kurt(missing$Satisfaction, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Skew(missing2$Satisfaction, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Kurt(missing2$Satisfaction, na.rm=TRUE, method = 2, conf.level = .99)
 ```
 
 
@@ -310,12 +313,10 @@ And the transformations
 ```
 
 ```{r ex3-solution}
-missing$Sat_sq<-sqrt(missing$Satisfaction+1)
-missing$Sat_log<-log10(missing$Satisfaction+1)
-missing$Sat_inv<-1/(missing$Satisfaction+1)
+missing2$Sat_sq<-sqrt(missing2$Satisfaction+1)
+missing2$Sat_log<-log10(missing2$Satisfaction+1)
+missing2$Sat_inv<-1/(missing2$Satisfaction+1)
 ```
-
-
 
 
 Now let's run skew and kurtosis for the transformed variables (I'll ask you questions about these after the next video) 
@@ -324,9 +325,9 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 
 ```{r ECHO=FALSE}
-missing$Sat_sq<-sqrt(missing$Satisfaction+1)
-missing$Sat_log<-log10(missing$Satisfaction+1)
-missing$Sat_inv<-1/(missing$Satisfaction+1)
+missing2$Sat_sq<-sqrt(missing2$Satisfaction+1)
+missing2$Sat_log<-log10(missing2$Satisfaction+1)
+missing2$Sat_inv<-1/(missing2$Satisfaction+1)
 ```
 
 ```{r echo=FALSE}
@@ -338,12 +339,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r ex4-solution}
-DescTools::Skew(missing$Sat_sq, na.rm=TRUE, method = 2, conf.level = .99)
-DescTools::Kurt(missing$Sat_sq, na.rm=TRUE, method = 2, conf.level = .99)
-DescTools::Skew(missing$Sat_log, na.rm=TRUE, method = 2, conf.level = .99)
-DescTools::Kurt(missing$Sat_log, na.rm=TRUE, method = 2, conf.level = .99)
-DescTools::Skew(missing$Sat_inv, na.rm=TRUE, method = 2, conf.level = .99)
-DescTools::Kurt(missing$Sat_inv, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Skew(missing2$Sat_sq, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Kurt(missing2$Sat_sq, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Skew(missing2$Sat_log, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Kurt(missing2$Sat_log, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Skew(missing2$Sat_inv, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Kurt(missing2$Sat_inv, na.rm=TRUE, method = 2, conf.level = .99)
 
 ```
 
@@ -353,14 +354,14 @@ DescTools::Kurt(missing$Sat_inv, na.rm=TRUE, method = 2, conf.level = .99)
 ## Interpreting Skew and Kurtosis
 
 ```{r}
-DescTools::Skew(missing$Satisfaction, na.rm=TRUE, method = 2, conf.level = .99)
-DescTools::Kurt(missing$Satisfaction, na.rm=TRUE, method = 2, conf.level = .99)
-DescTools::Skew(missing$Sat_sq, na.rm=TRUE, method = 2, conf.level = .99)
-DescTools::Kurt(missing$Sat_sq, na.rm=TRUE, method = 2, conf.level = .99)
-DescTools::Skew(missing$Sat_log, na.rm=TRUE, method = 2, conf.level = .99)
-DescTools::Kurt(missing$Sat_log, na.rm=TRUE, method = 2, conf.level = .99)
-DescTools::Skew(missing$Sat_inv, na.rm=TRUE, method = 2, conf.level = .99)
-DescTools::Kurt(missing$Sat_inv, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Skew(missing2$Satisfaction, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Kurt(missing2$Satisfaction, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Skew(missing2$Sat_sq, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Kurt(missing2$Sat_sq, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Skew(missing2$Sat_log, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Kurt(missing2$Sat_log, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Skew(missing2$Sat_inv, na.rm=TRUE, method = 2, conf.level = .99)
+DescTools::Kurt(missing2$Sat_inv, na.rm=TRUE, method = 2, conf.level = .99)
 ```
 
 ```{r echo=FALSE}
@@ -559,7 +560,7 @@ full<-dplyr::rename(full, X1 = X1, X2 = X2, X3 = X3)
 missex<-simsem::imposeMissing(full,cov=1, pmMAR = .30)
 missex$condition<-gl(2, 240, labels = c("Control", "Treat"))
 missex<-as.data.frame(missex)
-missing<-dplyr::select(missing,Performance,Satisfaction,WellBeing,Condition )
+missing<-dplyr::select(missing2,Performance,Satisfaction,WellBeing,Condition)
 ```
 
 Running Imputations
@@ -595,19 +596,17 @@ Using the datafile *missing2* from perform multiple imputation, get diagnostics 
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-First, do the imputations 
+First, do the imputations and pooling (I'd normally do pooling last but for some reason that is crashing). Note that you will get two coefficients for condition.
 
 
-
-
-```{r ex6, exercise = TRUE, exercise.lines = 1}
+```{r ex6, exercise = TRUE, exercise.lines = 2}
 
 
 ```
 
 ```{r ex6-solution}
 mi <- amelia(missing2, m=20, noms = "Condition")
-
+z.out <- zelig(Satisfaction ~ Condition, model= "ls", data= mi)
 ```
 
 Now, the diagnostics.
@@ -623,16 +622,15 @@ plot(mi, which.vars=2)
 plot(mi, which.vars=3)
 ```
 
-And finally, the pooling. 
 
-```{r ex8, exercise = TRUE, exercise.lines = 2}
-```
+#```{r ex8, exercise = TRUE, #exercise.lines = 2}
+#```
 
-Note that you will get two coefficients for condition. 
-```{r ex8-solution}
-z.out <- zelig(Satisfaction ~ Condition, model= "ls", data= mi) 
-summary(z.out)
-```
+
+#```{r ex8-solution}
+ 
+#summary(z.out)
+#```
 
 ## Video 10: Maximum Likelihood and Final Topics
 ![](https://youtu.be/9NeRqmgghSo)
