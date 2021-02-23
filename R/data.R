@@ -56,3 +56,15 @@
 #' }
 
 "missing2"
+
+#' A dataset examining responses to an interacial interaction
+#'
+#' @format A data frame with 148 rows and 4 variables
+#' \describe{
+#'   \item{XMeta}{Overall attitude}
+#'   \item{XPosEmo}{Positive Emotions}
+#'   \item{goal_manip}{Manipulated factor}
+#'   \item{fr_manip}{Manipulated factor}
+#' }
+
+"Green1"
