@@ -12,7 +12,7 @@ To run a tutorial, use this code.
     run_tutorial("ttest", package = "ANOVATutorials")
     run_tutorial("OneFactorANOVA", package = "ANOVATutorials")
     run_tutorial("Assumptions", package = "ANOVATutorials")
-
+    run_tutorial("FactorialANOVA", package = "ANOVATutorials")
 After you run this code, the tutorial will open in a tab on your
 browser.
 
