@@ -1,0 +1,480 @@
+---
+title: "Within Subjects ANOVA"
+output: learnr::tutorial
+runtime: shiny_prerendered
+description: >
+  One and two factor within subjects ANOVA, sphericity
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(knitr)
+library(lsr)
+library(car)
+library(ggplot2)
+library(ANOVATutorials)
+library(dplyr)
+```
+
+# Within Subjects ANOVA
+
+## Overview
+
+This tutorial focuses on one and two factor within subjects ANOVA. I also discuss effect sizes, simple effects tests, assumptions, and APA style.
+
+NOTE: THIS TUTORIAL RENDERS BEST IN A BROWSER WINDOW. Use the button in the upper left hand corner to open in browser window. 
+
+The PowerPoint slides for the presentation in the videos are on Canvas if you want a standalone copy. 
+
+The videos (as well as others) can also be found on my YouTube channel 
+The videos (as well as others) can also be found on my YouTube channel https://www.youtube.com/channel/UC5kDZTyHZlgSgSEa3YQXOi
+
+Credit to our oldest, Ernesto Aberson for his work creating the 
+
+### Learning Objectives
+
+Define the different types of Sums of Square in the within subjects context
+
+Explore links between paired t-test approaches and within subject ANOVA
+
+Explain the conditions for applying the within subjects ANOVA
+
+Compute Sums of Squares, degrees of freedom, Mean Square, and F
+
+Apply the above procedures to making decisions about null hypotheses
+
+Graph and interpret interaction effects 
+
+Use R to compute ANOVA and eta-squared
+
+Apply simple effects tests to formally evaluation interactions
+
+Test assumptions for a within subjects ANOVA
+
+## Data
+
+*West* is the datafile used in exercises. These data examine changes in body image following an intervention from **pre** to **post**. Half of the participants interacted in a bar setting with other participants (the bar was otherwise empty) while naked and the others interacted similarly (in a different room) while clothed **condition**.
+
+*Gaither* examines support for Hillary Clinton before (**pre**) and after (**post**) the 2016 election and how such relationships are affected by participant gender (**gender**).
+
+Both datafiles will be used for several examples. 
+
+
+### Packages 
+
+This tutorial uses the following new packages:
+
+* `lsr` for effect sizes
+* `car` for ANOVA computations
+* `ez` for running ANOVA
+* `lme4` for linear mixed models
+
+## Video I Introduction
+
+![](https://youtu.be/ErlOdcDYPUk)
+
+## Quiz 1 
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+``` 
+
+```{r quiz1, ECHO=F}
+learnr::quiz(
+  learnr::question("The paired t-test requires ... ",
+    learnr::answer("Two measurement points", correct = TRUE),
+    learnr::answer("Different people in each group"),
+    learnr::answer("Two t-tests"),
+    learnr::answer("Pears"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+  learnr::question("Consideration of the correlation between our two measurement points ...",
+    learnr::answer("Reduces the standard error", correct = TRUE),
+    learnr::answer("Inflates the standard error"),
+    learnr::answer("Inflates the effect size"),
+    learnr::answer("Is not a thing"),
+    correct = "Correct.",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    allow_retry = T
+  ),
+  learnr::question("Reducing the standard error makes ... ",
+    learnr::answer("smaller t-values"),
+    learnr::answer("bigger t-values", correct = TRUE),
+    learnr::answer("smaller effect sizes"),
+    learnr::answer("bigger effect sizes"),    
+    correct = "Correct.",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    allow_retry = T
+  )
+)
+
+``` 
+
+## Video II Within Subjects ANOVA
+
+![](https://youtu.be/waW7wr7U3HE)  
+
+## Quiz
+
+```{r quiz2, ECHO=F}
+learnr::quiz(
+ learnr::question("How is SS within partitioned in within subjects designs ",
+    learnr::answer("Into SS error and SS subject", correct = TRUE),
+    learnr::answer("It isn't"),
+    learnr::answer("Into SS error and SS wtf"),
+    learnr::answer("Into SS Between and SS error"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+   learnr::question("What is the denominator of the F value for within designs?",
+    learnr::answer("MS within"),
+    learnr::answer("MS between"),
+    learnr::answer("MS subject"),
+    learnr::answer("MS error", correct = TRUE),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+),
+   learnr::question("What is the key (new) aspect of the sphericity assumption?",
+    learnr::answer("homogenity of variance"),
+    learnr::answer("homogenity of covariance (correlations)", correct = TRUE),
+    learnr::answer("random assingment"),
+    learnr::answer("heteronormativity of variance"),      
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+   learnr::question("Why are violations of the sphericity assumption common",
+    learnr::answer("Because Mauchley's test is terrible"),
+    learnr::answer("Because Levene's test is terrible"),
+    learnr::answer("Because measures taken further apart tend to more weakly correlate than that taken closer together", correct = TRUE),
+    learnr::answer("Because of linear mixed models"),      
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+
+``` 
+
+
+## Video III Calculations
+
+![](https://youtu.be/d9HsgvSvXcI)
+
+## Exercise Calculations
+
+$\large SS_{Total}=\Sigma(x-\bar{x}_t)^2$  
+$\large SS_{Between}=\Sigma n_{cell}(\bar{x}_{cell}-\bar{x}_t)^2$  
+$\large SS_{Within}=\Sigma(x-\bar{x}_{cell})^2$    
+$\large SS_{A}=\Sigma n_{A}(\bar{x}_{A}-\bar{x}_t)^2$   
+$\large SS_{B}=\Sigma n_{B}(\bar{x}_{B}-\bar{x}_t)^2$  
+$\large SS_{AxB}=SS_{BG}-SS_{A}-SS_{B}$  
+$\large SS_{subject}=\Sigma t(\bar{x}_{block}-\bar{x}_t)^2$   
+$\large SS_{error}=SS_{within}-SS_{subjects}$ 
+$\large MS_{Between}=\frac{SS_{Between}}{df_{Between}}$  
+$\large MS_{Error}=\frac{SS_{Error}}{df_{Error}}$  
+$\large MS_{Between}=\frac{SS_{Between}}{df_{Between}}$  
+$\large df_{between}=levels-1$  
+$\large df_{error}=(people-levels)$  
+$\large F=\frac{MS_{between}}{MS_{error}}$  
+```{r}
+
+time1<-c(2,4,6)
+time2<-c(6,8,10)
+time3<-c(8,12,16)
+xx<-as.data.frame(cbind(time1,time2,time3))
+knitr::kable(xx)
+```
+
+```{r }
+time1<-c(2,4,6)
+time2<-c(6,8,10)
+time3<-c(8,12,16)
+xx<-as.data.frame(cbind(time1,time2,time3))
+
+```
+
+```{r quiz3, ECHO=F}
+learnr::quiz(
+ learnr::question("For the small dataset above, what is SS Total?",
+    learnr::answer("48"),
+    learnr::answer("5.33"),
+    learnr::answer("144",correct = TRUE),
+    learnr::answer("18"),      
+    learnr::answer("96"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+  learnr::question("What is SS Between?",
+    learnr::answer("48"),
+    learnr::answer("5.33"),
+    learnr::answer("144"),
+    learnr::answer("18"),  
+    learnr::answer("96",correct = TRUE),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ), 
+ learnr::question("What is SS Within?",
+    learnr::answer("48",correct = TRUE),
+    learnr::answer("5.33"),
+    learnr::answer("144"),
+    learnr::answer("18"),
+    learnr::answer("96"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ), learnr::question("What is SS Error?",
+    learnr::answer("48"),
+    learnr::answer("5.33",correct = TRUE),
+    learnr::answer("144"),
+    learnr::answer("18"),  
+    learnr::answer("96"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ), learnr::question("What is F?",
+    learnr::answer("48"),
+    learnr::answer("5.33"),
+    learnr::answer("144"),
+    learnr::answer("18",correct = TRUE),
+    learnr::answer("96"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+
+``` 
+
+## Video IV: Example and R 
+
+![](https://youtu.be/jZo-UuU1AwM)
+
+
+
+## One Factor Within ANOVA in R
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Withing subjects ANOVA requires a bit of data restructuring. For most applications, we use "wide" format wherein every row represents one person and we have a column for each variable. Within subjects approaches generally require "long" format where each person will be in multiple rows (one for each level of the within subject factor).
+
+The first line of code creates an ID number for us. This is essential because it is the only way we know who goes with what. 
+
+The second moves us from wide to long format. key is the name for a new variable that establishes the within subjects condition and value is what we are calling our new DV. -ID makes sure ID is repeated each time a person had data. 
+
+Next we need to make sure all factors are converted to factors and all numeric data are converted to numeric. 
+
+The final line runs the anova using the `ez` package. dv, wid, and within are the relevant variables for analysis.  
+
+```{r}
+Gaither$ID<-seq(1:191)
+Gaitherlong<-tidyr::gather(Gaither,key="Condition",value="Censor",-ID, -gender)
+Gaitherlong$Censor<-as.numeric(Gaitherlong$Censor)
+Gaitherlong$Condition<-as.factor(Gaitherlong$Condition)
+modelGaither<-ez::ezANOVA(data=Gaitherlong, dv=.(Censor), wid=.(ID), within = .(Condition), type=3, detailed=TRUE)
+modelGaither
+```
+
+### Exercise 
+
+Using the *West* data, predict attitudes body_image from time. You will need to restructure the data as noted above (there are 51 cases).
+
+```{r ex2, exercise = TRUE, exercise.lines = 7}
+
+```
+
+```{r ex2-solution}
+load(file="G:/My Drive/ANOVAtutorials/data/West.RData")
+West$ID<-seq(1:51)
+Westlong<-tidyr::gather(West,key="Time",value="body_image",-ID, -condition)
+Westlong$Time<-as.factor(Westlong$Time)
+Westlong$body_image<-as.numeric(Westlong$body_image)
+modelWest<-ez::ezANOVA(data=Westlong, dv=.(body_image), wid=.(ID), within = .(Time), type=3, detailed=TRUE)
+modelWest
+
+```
+## Quiz
+
+
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r}
+load(file="G:/My Drive/ANOVAtutorials/data/West.RData")
+West$ID<-seq(1:51)
+Westlong<-tidyr::gather(West,key="Time",value="body_image",-ID, -condition)
+Westlong$Time<-as.factor(Westlong$Time)
+Westlong$body_image<-as.numeric(Westlong$body_image)
+modelWest<-ez::ezANOVA(data=Westlong, dv=.(body_image), wid=.(ID), within = .(Time), type=3, detailed=TRUE)
+modelWest
+mean(West$pre)
+mean(West$post)
+```
+
+
+
+```{r quiz5, ECHO=F}
+learnr::quiz(
+ learnr::question("What is your primary conlusion regarding the effect of time?",
+    learnr::answer("Body image rose from pretest to posttest"),
+    learnr::answer("Body image fell from pretest to posttest"),
+    learnr::answer("The posttest happened after the pretest"),
+    learnr::answer("Body image did not change",correct=TRUE),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+
+``` 
+
+
+## Video 5: Sphericity, two within subjects factors, and simple effects
+
+![](https://youtu.be/X3E3b09ENuk)
+
+## Sphericity Exercise
+
+Recall the following decision chart from the ppt slides. 
+
+![](images\sphericity.png)
+
+Using the dataset called *memory* assess the sphericity assumption. These data represent three measurement time points. A pretest, a posttest following implementation of a memory training course, and a three month followup. Variables are **id**, **Memory**, and **Condition**.
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Recall the format of the code below. This will automatically generate sphericity values when we have more than three levels. 
+
+```{r}
+modelWest<-ez::ezANOVA(data=Westlong, dv=.(body_image), wid=.(ID), within = .(Time), type=3, detailed=TRUE)
+modelWest
+```
+
+Use the **memory** dataset to address the sphericity assumption. These data are already restructured. 
+
+```{r ex3, exercise = TRUE, exercise.lines = 2}
+
+```
+
+```{r ex3-solution}
+xx<-ez::ezANOVA(data=memory, dv=.(Memory), wid=.(id), within = .(Condition), type=3, detailed=TRUE)
+xx
+```
+
+## Quiz
+
+```{r}
+xx<-ez::ezANOVA(data=memory, dv=.(Memory), wid=.(id), within = .(Condition), type=3, detailed=TRUE)
+xx
+```
+
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r quiz6, ECHO=F}
+learnr::quiz(
+ learnr::question("Based on the sphericity value, which of the adjustments would you choose (leave sample size out of the decision for now)",
+    learnr::answer("No adjustment"),
+    learnr::answer("Greenhouse-Geisser for one and Hyuhn-Feldt for the other"),
+    learnr::answer("No adjustment needed"),
+    learnr::answer("Hyuhn-Feldt",correct=TRUE),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+  learnr::question("What is your conclusion about the effect of time on risk?",
+    learnr::answer("Risk changes over time"),
+    learnr::answer("Time changes over risk"),
+    learnr::answer("Risk does not change over time",correct=TRUE),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+
+``` 
+
+## Doubly Within with Simple effects in R
+
+Returning to the video example, we see the code is simply expanded to include a second factor. Simple effects tests are most easily conducted on the original data in wide format. 
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+options(contrasts=c("contr.helmert", "contr.poly"))
+xx<-ez::ezANOVA(data=long2F, dv=.(risk), wid=.(id), within = .(time,condom), type=3, detailed=TRUE)
+xx
+t.test(twofactorwithin$t1c1,twofactorwithin$t1c2, paired=TRUE)
+cohensD(twofactorwithin$t1c1,twofactorwithin$t1c2,method="paired")
+t.test(twofactorwithin$t2c1,twofactorwithin$t2c2, paired=TRUE)
+cohensD(twofactorwithin$t2c1,twofactorwithin$t2c2,method="paired")
+t.test(twofactorwithin$t3c1,twofactorwithin$t3c2, paired=TRUE)
+cohensD(twofactorwithin$t3c1,twofactorwithin$t3c2,method="paired")
+t.test(twofactorwithin$t4c1,twofactorwithin$t4c2, paired=TRUE)
+cohensD(twofactorwithin$t4c1,twofactorwithin$t4c2,method="paired")
+```
+
+
+## Video 6: Linear Mixed Models
+
+![](https://youtu.be/G0X6xC2EOag)
+
+## LMM with R
+
+To run linear mixed models, we can use the `nlme` package (`lme4` is another popular one). The basic analysis structure involves running a baseline (a.k.a. intercept only model) that has no factors in it, running a model with your factor(s), and then comparing the models to address significance. 
+
+```{r}
+library(nlme)
+model1_baseline<-lme(risk~1, random = ~1|id/time, data=long2F,method="ML")
+model1_time<-lme(risk~time, random = ~1|id/time, data=long2F,method="ML")
+print(anova(model1_baseline,model1_time))
+```
+
+### Exercise
+
+Using the **memory** dataset, run a linear mixed model. 
+
+```{r ex4, exercise = TRUE, exercise.lines = 4}
+
+```
+
+```{r ex4-solution}
+library(nlme)
+model1_baseline<-lme(Memory~1, random = ~1|id/Condition, data=memory,method="ML")
+model1_Condition<-lme(Memory~Condition, random = ~1|id/Condition, data=memory,method="ML")
+print(anova(model1_baseline,model1_Condition))
+```
+
+##
+Congratulations! You've reached the end of the tutorial. 
