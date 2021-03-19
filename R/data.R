@@ -40,7 +40,7 @@
 #'   \item{Sat_log}{lg}
 #'   \item{Sat_inv}{inv}
 #' }
-
+#'
 "tutorial3"
 
 #' Missing data example 2
@@ -68,3 +68,93 @@
 #' }
 
 "Green1"
+
+
+#' A dataset examining identification with Hillary Clinton before and after the 2016 election
+#'
+#' @format A data frame with 382 rows and 4 variables
+#' \describe{
+#'   \item{Gender}{gender}
+#'   \item{pre}{pre}
+#'   \item{post}{post}
+#' }
+#'
+#'
+"Gaither"
+
+#' A dataset examining identification with Hillary Clinton before and after the 2016 election
+#'
+#' @format A data frame with 382 rows and 4 variables
+#' \describe{
+#'   \item{gender}{Gender}
+#'   \item{id}{ID}
+#'   \item{ivw}{Within group factor}
+#'   \item{identification}{identification}
+#'
+#'
+"Gaitherlong"
+
+
+#' A dataset examining body image as a function of an invervention
+#'
+#' @format A data frame with 51 rows and 3 variables
+#' \describe{
+#'   \item{pre}{pre}
+#'   \item{post}{post}
+#'   \item{condition}{condition}
+#'
+#'
+"West"
+
+
+#' A dataset examining body image as a function of an invervention
+#'
+#' @format A data frame with 102 rows and 4 variables
+#' \describe{
+#'   \item{condition}{condition}
+#'   \item{id}{id}
+#'   \item{time}{time}
+#'   \item{body_image}{Body Image}
+#'
+#'
+"Westlong"
+
+#' A dataset examining body image as a function of an intvervention
+#'
+#' @format A data frame with 150 rows and 3 variables examining changes in memory
+#' \describe{
+#'   \item{id}{id}
+#'   \item{Memory}{Memory}
+#'   \item{Condition}{Condition}
+#'
+#'
+"memory"
+
+#' A dataset examining body image as a function of an invervention
+#'
+#' @format A data frame with 102 rows and 4 variables
+#' \describe{
+#'   \item{condition}{condition}
+#'   \item{id}{id}
+#'   \item{time}{time}
+#'   \item{body_image}{Body Image}
+#'
+#'
+"twofactorwithin"
+
+#' A dataset examining body image as a function of an invervention
+#'
+#' @format A data frame with 4 rows and 9 variables
+#' \describe{
+#'   \item{id}{id}
+#'   \item{t1c1}{t1c1}
+#'   \item{t1c2}{t1c2}
+#'   \item{t2c1}{t2c1}
+#'   \item{t2c2}{t2c2}
+#'   \item{t3c1}{t3c1}
+#'   \item{t3c2}{t3c2}
+#'   \item{t4c1}{t4c1}
+#'   \item{t4c2}{t4c2}
+#'
+#'
+"long2F"
