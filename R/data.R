@@ -90,7 +90,7 @@
 #'   \item{id}{ID}
 #'   \item{ivw}{Within group factor}
 #'   \item{identification}{identification}
-#'
+#'}
 #'
 "Gaitherlong"
 
@@ -102,7 +102,7 @@
 #'   \item{pre}{pre}
 #'   \item{post}{post}
 #'   \item{condition}{condition}
-#'
+#'}
 #'
 "West"
 
@@ -115,7 +115,7 @@
 #'   \item{id}{id}
 #'   \item{time}{time}
 #'   \item{body_image}{Body Image}
-#'
+#'}
 #'
 "Westlong"
 
@@ -126,7 +126,7 @@
 #'   \item{id}{id}
 #'   \item{Memory}{Memory}
 #'   \item{Condition}{Condition}
-#'
+#'}
 #'
 "memory"
 
@@ -138,15 +138,14 @@
 #'   \item{id}{id}
 #'   \item{time}{time}
 #'   \item{body_image}{Body Image}
-#'
+#'}
 #'
 "twofactorwithin"
 
-#' A dataset examining body image as a function of an invervention
+#'   #' A dataset examining body image as a function of an invervention
 #'
 #' @format A data frame with 4 rows and 9 variables
 #' \describe{
-#'   \item{id}{id}
 #'   \item{t1c1}{t1c1}
 #'   \item{t1c2}{t1c2}
 #'   \item{t2c1}{t2c1}
@@ -155,6 +154,35 @@
 #'   \item{t3c2}{t3c2}
 #'   \item{t4c1}{t4c1}
 #'   \item{t4c2}{t4c2}
-#'
+#'}
 #'
 "long2F"
+
+#' A dataset examining grade as a function of condition controlling for GPA
+#'
+#' @format A data frame with 72 rows and 3 variables
+#' \describe{
+#'   \item{grade}{grade}
+#'   \item{course}{course}
+#'   \item{gpa}{gpa}
+#'}
+"ancova1"
+
+#' A dataset examining sarcasm as a function of condition controlling for Agreeableness
+#'
+#' @format A data frame with 2231 rows and 3 variables
+#' \describe{
+#'   \item{sarcasm}{sarcasm}
+#'   \item{PowerCond}{PowerCond}
+#'   \item{Agreeableness}{Agreeableness}
+#'}
+"ML"
+
+#' A dataset examining sex partners as a function of group
+#'
+#' @format A data frame with 641 rows and 2 variables
+#' \describe{
+#'   \item{SexPartner_Life}{Sexy fun time partners}
+#'   \item{Group}{Group}
+#'}
+"metalnew"
