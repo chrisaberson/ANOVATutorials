@@ -1,0 +1,410 @@
+---
+title: "Odds and Ends"
+output: learnr::tutorial
+runtime: shiny_prerendered
+description: >
+  Odds and Ends
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(knitr)
+library(lsr)
+library(car)
+library(ggplot2)
+library(ANOVATutorials)
+library(dplyr)
+
+library(WRS2)
+
+```
+
+# Odds and Ends
+
+## Overview
+
+This tutorial focuses on a handful of remaining topics. 
+
+NOTE: THIS TUTORIAL RENDERS BEST IN A BROWSER WINDOW. Use the button in the upper left hand corner to open in browser window. 
+
+The PowerPoint slides for the presentation in the videos are on Canvas if you want a standalone copy. 
+
+The videos (as well as others) can also be found on my YouTube channel 
+ https://www.youtube.com/channel/UC5kDZTyHZlgSgSEa3YQXOi
+
+### Learning Objectives
+
+Test ANCOVA assumptions
+
+Run and Interpret ANCOVA
+
+List problems with covariates
+
+Describe the limits of null hypothesis significance testing around null effects
+
+Perform and interpret equivalence tests
+
+Perform and interpret Bayes Factors
+
+Go on a rant about MANOVA
+
+Identify other great free resources for statistics
+
+
+## Data
+
+*ancova1* includes the example with **grade**, **GPA**, and **condition** from the video.
+
+*ML* contains **sarcasm**, **PowerCond**, and **Agreeableness**
+
+
+### Packages 
+
+This tutorial uses the following new packages:
+
+* `lsr` for effect sizes
+* `car` for ANOVA computations
+* `Toster` for running equivalence tests and making toast
+* `BayesFactor` for ... I'll just let you figure that one out. 
+* `WRS2` for robust tests
+
+## Video I ANCOVA
+
+![](https://youtu.be/ytFQasZGbJ4)
+
+## Quiz 1 
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+``` 
+
+```{r quiz1, ECHO=F}
+learnr::quiz(
+  learnr::question("ANOCVA involves ... ",
+    learnr::answer("Co-operation"),
+    learnr::answer("Co-variate(s)", correct = TRUE),
+    learnr::answer("Co-relation"),
+    learnr::answer("Co-Ca Cola"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+  learnr::question("The new assumption for ANCOVA is ...",
+    learnr::answer("Homogeneity of covariance", correct = TRUE),
+    learnr::answer("Sphericity"),
+    learnr::answer("Homogeneity of variance"),
+    learnr::answer("Homogeneity of heterogeneity"),
+    correct = "Correct.",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    allow_retry = T
+  )
+)
+
+``` 
+
+## Exercise
+
+This example comes from the video. The first step is to test the homogeneity assumption. We accomplish that by running an ANOVA with the covariate treated as a factor. 
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+``` 
+
+```{r}
+anc.assum<-aov(grade ~ gpa+course+gpa:course, data=ancova1)
+Anova(anc.assum, type="III")
+
+```
+
+Here, the interaction is not significant, meaning that we can remove it and actually run the ANCOVA. All that involves is removing the interaction. 
+
+```{r}
+anc<-aov(grade ~ gpa+course, data = ancova1)
+Anova(anc, type="III")
+
+```
+
+
+The datafile *ML* represents the Many Labs 3 project. In this study, students wrote about a time when they had power over others (high-power condition) or about a time when someone else had power over them (low-power condition) **PowerCond**. They then read a scenario in which they and a colleague went to a fancy restaurant. The restaurant had been recommended by the colleague's friend but they and their colleague ended up having a poor dining experience. The scenario then described their colleague sending an email to their friend who recommended the restaurant saying, “About the restaurant, it was marvelous, just marvelous.” Thus, the participant knew that the response was sarcastic but the friend did not. The researchers expected Participants in the high-power condition thought that the colleague's friend would interpret the message as being more sarcastic (**sarcasm**) but only while controlling for **Agreeableness**  
+
+For these data test assumptions regarding homogeneity of covariance. 
+
+```{r ex1, exercise = TRUE, exercise.lines = 2}
+
+```
+
+```{r ex1-solution}
+anc.assum<-aov(sarcasm ~ PowerCond+Agreeableness+PowerCond:Agreeableness, data = ML)
+Anova(anc.assum, type="III")
+```
+
+Given that the interaction was non-significant, run the analysis again without it. 
+
+```{r ex2, exercise = TRUE, exercise.lines = 2, exercise.eval=FALSE}
+
+```
+
+```{r ex2-solution}
+anc<-aov(sarcasm ~ PowerCond+Agreeableness, data = ML)
+Anova(anc, type="III")
+```
+
+## Video II Null Results
+
+![](https://youtu.be/dfpCKjerP80)  
+
+## Quiz
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r quiz2, ECHO=F}
+learnr::quiz(
+ learnr::question("Null hypothesis significance testing (NHST) can tell us the following about support for null hypotheses",
+    learnr::answer("Not a whole heck of a lot", correct = TRUE),
+    learnr::answer("Whether or not the null is likely to be true"),
+    learnr::answer("If the null is more likely than the alternative"),
+    learnr::answer("That the alternative is more likely than the null"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+   learnr::question("What do Bayes Factors tell us?",
+    learnr::answer("The strength of confidence in your NHST conclusions"),
+    learnr::answer("Whether or not the null is likely to be true"),
+    learnr::answer("If Thomas Bayes approves of your null"),
+    learnr::answer("The likelihood of the null over the alternative (or vice versa)", correct = TRUE),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+),
+   learnr::question("What is the primary question addressed by equivalence testing?",
+    learnr::answer("The strength of confidence in your NHST conclusions"),
+    learnr::answer("Whether or not the null is likely to be true"),
+    learnr::answer("Whether we can rule out effects of a certain size", correct = TRUE),
+    learnr::answer("The likelihood of the null over the alternative or vice versa"),     
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+)
+)
+``` 
+
+
+## Exercise 
+
+
+For this example, we are reviewing the problem where we had a one point mean difference with SD of 5 and 200 people. 
+
+We decided that the smallest effect size of interest is d = 0.4. We take all that information to the code below. 
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+``` 
+
+```{r}
+TOSTER::TOSTtwo(m1=21,m2=20,sd1=5,sd2=5,n1=100,n2=100,low_eqbound_d=-0.4,high_eqbound_d=0.4)   
+```
+
+### 
+
+Using the *ML* data test for equivalence. Relevant output appears below. 
+```{r}
+tapply(ML$sarcasm,ML$PowerCond, mean)
+tapply(ML$sarcasm,ML$PowerCond, sd)
+table(ML$PowerCond)
+lsr::cohensD(ML$sarcasm~ML$PowerCond)
+```
+
+
+```{r ex3, exercise = TRUE, exercise.lines = 1}
+
+```
+
+
+```{r ex3-solution}
+TOSTER::TOSTtwo(m1=3.74,m2=3.82,sd1=1.57,sd2=1.58,n1=100,n2=100,low_eqbound_d=-0.047,high_eqbound_d=0.047) 
+```
+
+### 
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+```{r quiz4, ECHO=F}
+learnr::quiz(
+ learnr::question("What is your primary conlusion regarding equivalence?",
+    learnr::answer("We do not have evidence for equivalance"),
+    learnr::answer("The evidence for equivalence is strong"),
+    learnr::answer("The alternative is more likely than the null"),
+    learnr::answer("them groups, yup, equivalent",correct=TRUE),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+
+``` 
+
+## Bayes Factors
+
+![](images\Thomas_Bayes.GIF)
+
+"Hi, I'm Thomas Bayes, here to teach you about Bayes Factors. Yes, we did used to dress like this. I was, in fact, quite stylish for the time."
+
+"Enough small talk. The Bayes Factor (BF) statistic addresses the strength of evidence for the null vs. alternative hypotheses. BF values greater than 1.0 in the context of these analyses suggest greater support for the null compared to the alternative with values 3.0 or greater indicating substantial evidence and values greater than 10.0 indicating strong evidence. Over 30 is "very strong" and over 100 is "extreme evidence." 
+
+"Here's how you run this in some sort of witchcraft called R. You can just do this as a t-test. The regular result is BF10 - that's likelihood of Alternative over Null. The 1/BF converts that to BF10 - likelihood of Null over Alternative."
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+``` 
+
+
+```{r}
+bf<-BayesFactor::ttestBF(formula = grade~course, data = ancova1)
+1/bf
+```
+
+"Before I go, I've got a joke for you! What's a Bayesian friend known as? A BFF!"
+
+### Exercise
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###  
+
+For the analyses using the *ML* dataset, run a Bayes Factor using **sarcasm** and **PowerCond**.  
+
+```{r ex5, exercise = TRUE, exercise.lines = 2}
+
+```
+
+
+```{r ex5-solution}
+bf<-BayesFactor::ttestBF(formula = sarcasm~PowerCond, data = ML)
+1/bf
+```
+
+
+## Quiz  
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+For our BF01 of around 11, what would be your conclusion. Recall that greater support for the null compared to the alternative with values 3.0 or greater indicating substantial evidence and values greater than 10.0 indicating strong evidence. Over 30 is "very strong" and over 100 is "extreme evidence." 
+
+```{r quiz5, ECHO=F}
+learnr::quiz(
+ learnr::question("What is your primary conlusion regarding the BF?",
+    learnr::answer("We do not have evidence for equivalance"),
+    learnr::answer("The null is no more or less like than the alternative"),
+    learnr::answer("Reject the null"),
+    learnr::answer("There is strong evidence that the null is more likely than the alternative",correct=TRUE),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+))
+``` 
+
+
+## Video 3: MANOVA  
+
+![](https://youtu.be/JHLaU3aCEi8)
+
+## Exercise
+
+Using the dataset *manova* run an analysis for with the three dvs (**dv1**, **dv2**, **dv3**) and the factor **iv**. 
+
+```{r ex6, exercise = TRUE, exercise.lines = 2}
+
+```
+
+
+```{r ex6-solution}
+#What the hell is wrong with you Aberson? MANOVA is terrible
+```
+
+### 
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+``` 
+
+```{r quiz6, ECHO=F}
+learnr::quiz(
+ learnr::question("What the main issue with MANOVA?",
+    learnr::answer("Only men can use it. That's sexist AF"),
+    learnr::answer("It inflates type I error"),
+    learnr::answer("If it isn't Bayesian it is crap!"),
+    learnr::answer("You always need to follow up with a series of univariate ANOVA ... so why bother?",correct=TRUE),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+),
+ learnr::question("When instructed to run a MANOVA by your advisor, how will you respond?",
+    learnr::answer("Absolutely!"),
+    learnr::answer("What's MANOVA"),
+    learnr::answer("If it isn't Bayesian it is crap!"),
+    learnr::answer("Aww. Hell to the no.",correct=TRUE),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+)
+
+)
+
+``` 
+
+## Video 4: Robust analyses
+
+![](https://youtu.be/w6Mt6Ocyijw)  
+
+
+## Exercise
+
+The code below restructures data for our analyses. This package can't handle missing data so I simply removed it ... yeah, I know but do you want to spend 40 minutes imputing? 
+
+metalnew<-subset(metal,(!is.na(metal$SexPartner_Life)))
+
+Next are our analyses
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+``` 
+
+```{r}
+WRS2::t1way(SexPartner_Life ~ Group, metalnew)
+WRS2::med1way(SexPartner_Life ~ Group, metalnew)
+WRS2::t1waybt(SexPartner_Life ~ Group, metalnew)
+```
+
+For the *ML* data, use a robust test (t1way) to compare **sarcasm** by **PowerCond**
+
+```{r ex7, exercise = TRUE, exercise.lines = 1}
+
+```
+
+
+```{r ex7-solution}
+WRS2::t1way(sarcasm ~ PowerCond, ML)
+```
+
+## Video 5: Other Useful Software
+
+![](https://youtu.be/V5NgeIq5jkI)
+
+
+##  
+
+Congratulations! You've reached the end of the tutorial. 

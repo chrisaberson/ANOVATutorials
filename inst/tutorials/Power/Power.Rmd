@@ -1,0 +1,379 @@
+---
+title: "Power"
+output: learnr::tutorial
+runtime: shiny_prerendered
+description: >
+  Power
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(knitr)
+library(ANOVATutorials)
+library(pwr2ppl)
+```
+
+# Statistical Power
+
+## Overview
+
+This tutorial focuses on statistical power for most of the designs discussed in class. 
+
+NOTE: THIS TUTORIAL RENDERS BEST IN A BROWSER WINDOW. Use the button in the upper left hand corner to open in browser window. 
+
+The PowerPoint slides for the presentation in the videos are on Canvas if you want a standalone copy. 
+
+
+
+### Learning Objectives
+
+Define statistical power
+
+Distinguish between Type I and Type II errors
+
+List factors that influence power
+
+Conduct power analyses for a variety of designs
+
+Distinguish between power and sensitivity analyses
+
+### Packages 
+
+This tutorial uses the following new packages:
+
+* `pwr2ppl` for power calculations
+
+## Video I Introduction
+
+![](https://youtu.be/Um6i77wRnIM)
+
+## Quiz 1 
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+``` 
+
+```{r quiz1, ECHO=F}
+learnr::quiz(
+  learnr::question("A Type II error is ... ",
+    learnr::answer("Falsely rejecting a true null"),
+    learnr::answer("Failing to reject a null that is false", correct = TRUE),
+    learnr::answer("Rejecting a false null"),
+    learnr::answer("Failing to reject a true null"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+  learnr::question("A type I error is",
+    learnr::answer("Falsely rejecting a true null", correct = TRUE),
+    learnr::answer("Failing to reject a null that is false"),
+    learnr::answer("Rejecting a false null"),
+    learnr::answer("Failing to reject a true null"),
+    correct = "Correct.",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    allow_retry = T
+  )
+)
+
+``` 
+
+## Video II Factors Affecting Power
+
+![](hhttps://youtu.be/Q3dQVNf2rao)  
+
+## Quiz
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r quiz2, ECHO=F}
+learnr::quiz(
+ learnr::question("Larger effect sizes ...",
+    learnr::answer("Increase power", correct = TRUE),
+    learnr::answer("Decrease power"),
+    learnr::answer("Are unrelated to power"),
+    learnr::answer("Lead to type II errors"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+   learnr::question("Smaller sample sizes ...",
+   learnr::answer("Increase power"),
+    learnr::answer("Decrease power", correct = TRUE),
+    learnr::answer("Are unrelated to power"),
+    learnr::answer("Lead to type II errors"),  
+     correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+),
+   learnr::question("More liberal values of alpha?",
+    learnr::answer("Increase power", correct = TRUE),
+    learnr::answer("Decrease power"),
+    learnr::answer("Are unrelated to power"),
+    learnr::answer("Lead to type II errors"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+)
+)
+``` 
+
+
+## Video III: Best Practices and Conventions
+
+![](https://youtu.be/PvWUVmramIw)
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+```{r quiz4, ECHO=F}
+learnr::quiz(
+ learnr::question("For variety of reasons, most researcher opt for what level of power?",
+    learnr::answer(".05"),
+    learnr::answer(".90"),
+    learnr::answer(".95"),
+    learnr::answer(".80",correct=TRUE),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+  learnr::question("The best practice for effect size selection is ...",
+    learnr::answer("Covention"),
+    learnr::answer("What others found"),
+    learnr::answer("A guess"),
+    learnr::answer("Smallest effect that would be meaningful",correct=TRUE),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+  learnr::question("What is sensitivity analysis?",
+    learnr::answer("Power based on your obtained sample and effect size"),
+    learnr::answer("An analysis of whether or not you have thin skin"),
+    learnr::answer("A more sensitive version of power analysis"),
+    learnr::answer("Power based on your sample size",correct=TRUE),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+
+``` 
+
+## Video IV: t-tests  
+
+![](https://youtu.be/l_GB0uQ5ot8)
+
+## Exercise 
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In the code below, the values for m, s, and n refer to means, standard deviations, and sample size for each group. Alpha is set to default to .05. For this example we are getting power for a design where a 2 point difference (d = 0.40) reflects the smallest effect size of interest. 
+
+```{r}
+pwr2ppl::indt(m1=22,m2=20,s1=5,s2=5,n1=80,n2=80)
+```
+
+Alternatively we can do this with a d value. using the tfromd function.
+
+```{r}
+tfromd(d=.4,nlow=10,nhigh=200,by=10, test="I")
+```
+
+We can also address paired t-tests. Here the r refers to the correlation between the two measures. This is generally challenging to estimate as it is not typically reported but you can get some hint from other values (e.g., test-retest scale reliability). If there is no information, setting r = .50 is conservative decision. 
+
+```{r}
+pairt(m1=25,m2=20, s = 5, n = 25, r = .5)
+```
+
+
+### 
+
+For an independent t-tests, what sample size would get 90% power for a minimal effect size of d = 0.20. Use the tfromd command to solve. 
+
+```{r ex1, exercise = TRUE, exercise.lines = 1}
+
+```
+
+
+```{r ex1-solution}
+tfromd(d=.2,nlow=400,nhigh=600,by=10, test="I")
+```
+
+What if this was a paired test? Use the same effect size. Note how much more powerful the paired test is. 
+
+
+```{r ex2, exercise = TRUE, exercise.lines = 1}
+
+```
+
+
+```{r ex2-solution}
+tfromd(d=.2,nlow=200,nhigh=400,by=10, test="P")
+```
+
+## Video V: One Factor ANOVA  
+
+![](https://youtu.be/ysoOTh9IavM)
+
+## Exercise
+
+In this example, we have four groups. 
+
+```{r}
+anova1f_4(m1=80, m2=82, m3=82,m4=86,s1=10, 
+s2=10,s3=10,s4=10,n1=60,n2=60,n3=60,n4=60) 
+```
+
+Of course, in ANOVA, we really don't have omnibus hypotheses, we always really are interested in specific contrasts. The c values in the code establish the specific contrast examined. 
+
+```{r}
+anova1f_4c(m1=80, m2=82,m3=82,m4=86,s1=10, s2=10,s3=10,s4=10,n1=60,n2=60,n3=60,n4=60,c1=1, c2=-1,c3=-0,c4=0,alpha=.05) 
+```
+
+For a design with three groups and means of 10,11, and 12, with a sd in all groups of 4, what sample size is required to achieve 80% power on the omnibus (F) test? 
+
+```{r ex3, exercise = TRUE, exercise.lines = 1}
+
+```
+
+
+```{r ex3-solution}
+anova1f_3(m1=10, m2=11,m3=12,s1=4, s2=4,s3=4,n1=79,n2=79,n3=79) 
+```
+
+Now, determine the sample size needed to have 80% power for a comparison between the first and second groups. 
+
+```{r ex4, exercise = TRUE, exercise.lines = 1}
+
+```
+
+
+```{r ex4-solution}
+anova1f_3c(m1=10, m2=11,m3=12,s1=4, s2=4,s3=4,n1=252,n2=252,n3=252, c1=1,c2=-1,c3=0)
+```
+
+
+## Video VI: Factorial ANOVA
+
+![](https://youtu.be/Hqs6A3psMRU)  
+
+
+## Exercise
+
+The code below is for a 2x2 design. m1.1 is first level of first factor, first level of second factor etc. 
+
+```{r}
+anova2x2(m1.1=0.85,m1.2=0.85,m2.1=0.00, m2.2=0.60,s1.1=1.7,s1.2=1.7,s2.1=1.7,s2.2=1.7, n1.1=250,n1.2=250,n2.1=250,n2.2=250, alpha=.05)
+
+```
+
+Of course, we really don't care about omnibus effects, so we can also get simple effects. 
+
+```{r}
+anova2x2_se(m1.1=0.85,m1.2=0.85,m2.1=0.00, m2.2=0.60,s1.1=1.7,s1.2=1.7,s2.1=1.7,s2.2=1.7, n1.1=250,n1.2=250,n2.1=250,n2.2=250, alpha=.05)
+
+```
+
+For a design with means of M1.1 = .2, M1.2 = .4, M2.1 = .2, M2.2 = 0, what sample size is needed for power of .95? Assume an SD = 1 for all groups
+
+```{r ex5, exercise = TRUE, exercise.lines = 1}
+
+```
+
+```{r ex5-solution}
+anova2x2(m1.1=0.2,m1.2=0.4,m2.1=0.2, m2.2=0.0,s1.1=1,s1.2=1,s2.1=1,s2.2=1, n1.1=325,n1.2=325,n2.1=325,n2.2=325, alpha=.05)
+
+```
+
+Now check on power for the simple effects tests. 
+```{r ex6, exercise = TRUE, exercise.lines = 1}
+
+```
+
+```{r ex6-solution}
+anova2x2_se(m1.1=0.2,m1.2=0.4,m2.1=0.2, m2.2=0.0,s1.1=1,s1.2=1,s2.1=1,s2.2=1, n1.1=325,n1.2=325,n2.1=325,n2.2=325, alpha=.05)
+
+```
+
+## Video VII: Within designs
+
+![](https://youtu.be/zpnIyRK3MIA)
+
+## Exercise
+
+For within designed we need to provide all correlations between measures. 
+
+```{r}
+win1F(m1=-.25,m2=.00,m3=.10,m4=.15,s1=.4,s2=.5,s3=.6,s4=.7,r12=.50, r13=.30, r14=.15, r23=.5, r24=.30, r34=.50, n=25)
+```
+
+If all the correlations and SD are the same, we can shorten the code. 
+
+For a design with three measures over time and means of 10,15,20 with all correlations of .6 and all standard deviations of 15, what sample size yields power = .90?
+
+```{r ex7, exercise = TRUE, exercise.lines = 1}
+
+
+```
+
+
+```{r ex-7 solution}
+win1F(m1=10,m2=15,m3=20,s1=15,s2=15,s3=15,r12=.6,r13=.6, r14=.65, r23=.6, r24=.6, r34=.6, n=25)
+```
+
+## Video VIII: Mixed designs
+
+![](https://youtu.be/uvSVn7tuCkM)
+
+## Exercise
+
+Mixed designs proceed just like the previous ones.  
+
+```{r}
+win1bg1(m1.1 = -.25, m2.1=0, m3.1=0.10, m4.1=.15, m1.2=-.25,m2.2=-.25, m3.2=-.25, m4.2=-.25, s=.4, r = .6,n = 20)
+
+```
+
+We can also do this as a linear mixed model. 
+
+```{r}
+lmm1w1b(m1.1 = -.25, m2.1=0, m3.1=0.10, m4.1=.15, m1.2=-.25,m2.2=-.25, m3.2=-.25, m4.2=-.25, s=.4, r = .6,n = 20)
+```
+
+For a 2x2 mixed design with means of 1,1,1,2, a standard deviation of 5 and an r = .7, what sample size yields power of .80 for the interaction regular ANOVA? 
+
+```{r ex8, exercise = TRUE, exercise.lines = 1}
+
+```
+
+
+```{r ex-8 solution}
+win1bg1(m1.1 = 1, m2.1=1, m1.2=1,m2.2=2, s=5, r = .7,n = 240)
+```
+
+Now do it as a linear mixed model. 
+
+```{r ex9, exercise = TRUE, exercise.lines = 1}
+
+```
+
+
+```{r ex-9 solution}
+lmm1w1b(m1.1 = 1, m2.1=1, m1.2=1,m2.2=2, s=5, r = .7,n = 240)
+```
+
+##
+
+Congratulations! You've reached the end of the tutorial. 

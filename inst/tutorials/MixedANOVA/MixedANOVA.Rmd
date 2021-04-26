@@ -1,0 +1,259 @@
+---
+title: "Mixed ANOVA"
+output: learnr::tutorial
+runtime: shiny_prerendered
+description: >
+  Mixed ANOVA
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(knitr)
+library(lsr)
+library(car)
+library(ggplot2)
+library(ANOVATutorials)
+library(dplyr)
+library(ez)
+library(lme4)
+```
+
+# Mixed ANOVA
+
+## Overview
+
+This tutorial focuses on mixed ANOVA - ANOVA with one or more within subject factors and one or more between subject factors. I also discuss effect sizes and simple interaction tests.
+
+NOTE: THIS TUTORIAL RENDERS BEST IN A BROWSER WINDOW. Use the button in the upper left hand corner to open in browser window. 
+
+The PowerPoint slides for the presentation in the videos are on Canvas if you want a standalone copy. 
+
+The videos (as well as others) can also be found on my YouTube channel 
+ https://www.youtube.com/channel/UC5kDZTyHZlgSgSEa3YQXOi
+
+### Learning Objectives
+
+Expand knowledge regarding withing subjects ANOVA to designs that add a between subject factor
+
+Explain the conditions for applying mixed ANOVA
+
+Compute effect sizes from linear mixed models
+
+Apply the above procedures to making decisions about null hypotheses
+
+Graph and interpret interaction effects 
+
+Use R to compute ANOVA and eta-squared
+
+Apply simple interactions tests to formally evaluate three-way interactions
+
+
+## Data
+
+*West* is the datafile used in exercises. These data examine changes in body image following an intervention from **pre** to **post**. Half of the participants interacted in a bar setting with other participants (the bar was otherwise empty) while naked and the others interacted similarly (in a different room) while clothed **condition**.
+
+*Gaither* examines support for Hillary Clinton before (**pre**) and after (**post**) the 2016 election and how such relationships are affected by participant gender (**gender**).
+
+Both datafiles will be used for several examples. 
+
+### Packages 
+
+This tutorial uses the following new packages:
+
+* `lsr` for effect sizes
+* `car` for ANOVA computations
+* `ez` for running ANOVA
+* `lme4` for linear mixed models
+
+## Video I Introduction
+
+![](https://youtu.be/4i0znRXwqJ8)
+
+## Quiz 1 
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+``` 
+
+```{r quiz1, ECHO=F}
+learnr::quiz(
+  learnr::question("Mixed ANOVA involves ... ",
+    learnr::answer("Two measurement points"),
+    learnr::answer("At least one between and one within subject factor", correct = TRUE),
+    learnr::answer("Mixing stuff up"),
+    learnr::answer("A standup mixer"),
+    correct = "Correct!",
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+  learnr::question("Sphericity considerations now include ...",
+    learnr::answer("Any factor or interaction that contains at least one within subjects term", correct = TRUE),
+    learnr::answer("All of the factors"),
+    learnr::answer("None of the factors"),
+    learnr::answer("Mixed ANOVA does not assume sphericity"),
+    correct = "Correct.",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    allow_retry = T
+  )
+)
+
+``` 
+
+## Video II Mixed ANOVA
+
+![](https://youtu.be/flGtnxym2E0)  
+
+## Quiz
+
+```{r quiz2, ECHO=F}
+learnr::quiz(
+ learnr::question("Simple interactions tests ... ",
+    learnr::answer("Break down complex interactions between three or more factors", correct = TRUE),
+    learnr::answer("Break down complex interactions between two factors"),
+    learnr::answer("Test main effects"),
+    learnr::answer("Breakdown SS within"),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+   learnr::question("How would you set up a simple interactions test for three factors?",
+    learnr::answer("Do t-tests on all pairs"),
+    learnr::answer("Using ANOVA"),
+    learnr::answer("with the computer"),
+    learnr::answer("Examine the interactions between two factors at each of the levels of the other factor", correct = TRUE),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+)
+)
+
+``` 
+
+
+## Exercise 
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Mixed subjects ANOVA requires the same data restructuring as for within. For most applications, we use "wide" format wherein every row represents one person and we have a column for each variable. Within subjects approaches generally require "long" format where each person will be in multiple rows (one for each level of the within subject factor).
+
+The first line of code creates an ID number for us. This is essential because it is the only way we know who goes with what. 
+
+The second moves us from wide to long format. key is the name for a new variable that establishes the within subjects condition and value is what we are calling our new DV. -ID makes sure ID is repeated each time a person had data. 
+
+Next we need to make sure all factors are converted to factors and all numeric data are converted to numeric. 
+
+The final line runs the anova using the `ez` package. dv, wid, and within are the relevant variables for analysis.  
+
+```{r}
+Gaither$ID<-seq(1:191)
+Gaitherlong<-tidyr::gather(Gaither,key="Condition",value="Censor",-ID, -gender)
+Gaitherlong$Censor<-as.numeric(Gaitherlong$Censor)
+Gaitherlong$Condition<-as.factor(Gaitherlong$Condition)
+modelGaither<-ez::ezANOVA(data=Gaitherlong, dv=.(Censor), wid=.(ID), within = .(Condition),between=.(gender), type=3, detailed=TRUE)
+modelGaither
+```
+
+For simple effects we simply need to do a couple of paired t-tests. This requires subsetting. 
+
+```{r}
+men<-subset(Gaither, gender=="Men")
+women<-subset(Gaither, gender=="Women")
+xx<-t.test(men$pre,men$post,paired=TRUE)
+xx
+lsr::cohensD(men$pre,men$post,method="paired")
+
+```
+
+
+### Exercise 
+
+Using the *Westlong* data, predict attitudes body_image from **time** and **condition** (naked or not naked). The data are already restructured. 
+
+```{r ex2, exercise = TRUE, exercise.lines = 7}
+
+```
+
+```{r ex2-solution}
+modelWest<-ez::ezANOVA(data=Westlong, dv=.(body_image), wid=.(id), within = .(time),between=.(condition), type=3, detailed=TRUE)
+modelWest
+```
+
+### Simple Effects
+
+Since there are only two factors, we only need to perform simple effects tests, in the form of two paired t-tests, subset by condition. Use the *West* not the *Westlong* data. 
+
+```{r ex3, exercise = TRUE, exercise.lines = 6}
+
+```
+
+
+```{r ex3-solution}
+nekkid<-subset(West, condition=="Naked")
+not_nekkid<-subset(West, condition=="Control")
+t.test(nekkid$pre,nekkid$post,paired=TRUE)
+lsr::cohensD(nekkid$pre,nekkid$post,method="paired")
+t.test(not_nekkid$pre,not_nekkid$post,paired=TRUE)
+lsr::cohensD(not_nekkid$pre,not_nekkid$post,method="paired")
+
+```
+
+## Quiz
+
+```{r}
+modelWest<-ez::ezANOVA(data=Westlong, dv=.(body_image), wid=.(id), within = .(time),between=.(condition), type=3, detailed=TRUE)
+modelWest
+tapply(West$pre, list(West$condition),mean)
+tapply(West$post, list(West$condition),mean)
+nekkid<-subset(West, condition=="Naked")
+not_nekkid<-subset(West, condition=="Control")
+t.test(nekkid$pre,nekkid$post,paired=TRUE)
+lsr::cohensD(nekkid$pre,nekkid$post,method="paired")
+t.test(not_nekkid$pre,not_nekkid$post,paired=TRUE)
+lsr::cohensD(not_nekkid$pre,not_nekkid$post,method="paired")
+```
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+```{r quiz5, ECHO=F}
+learnr::quiz(
+ learnr::question("What is your primary conlusion regarding the interaction?",
+    learnr::answer("Body image rose from pretest to posttest"),
+    learnr::answer("Body image fell from pretest to posttest"),
+    learnr::answer("The posttest happened after the pretest"),
+    learnr::answer("Body image changed in a different manner for each group",correct=TRUE),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  ),
+ learnr::question("What do the simple effects tests tell us about the interaction?",
+    learnr::answer("Body image rose from pretest to posttest"),
+    learnr::answer("Body image fell from pretest to posttest"),
+    learnr::answer("The posttest happened after the pretest"),
+    learnr::answer("Body image improved for the nakeds but got worse for those in the control group",correct=TRUE),  
+    correct = "Correct!" ,
+    incorrect = "Sorry, that is incorrect. Try again.",
+    random_answer_order = TRUE,
+    allow_retry = T
+  )
+)
+
+``` 
+
+
+## Video 3: APA style
+
+![](https://youtu.be/spn_-2mVOgc)
+
+##  
+
+Congratulations! You've reached the end of the tutorial. 
